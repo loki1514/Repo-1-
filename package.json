@@ -11,6 +11,8 @@
     "start": "npm run start --workspace apps/web"
   },
   "devDependencies": {
-    "pg": "^8.23.0"
+    "pdfjs-dist": "^6.3.289",
+    "pg": "^8.23.0",
+    "playwright": "^1.62.1"
   }
 }

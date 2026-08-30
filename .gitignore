@@ -24,3 +24,14 @@ out/
 
 # TypeScript
 *.tsbuildinfo
+
+# Report build artefacts — the generator is committed, its output is not.
+# Screenshots and the rendered PDF total ~45MB and are reproducible with
+# `node report/capture.mjs && node report/build-report.mjs`.
+report/shots/
+report/opt/
+report/pages/
+report/pdfpages/
+report/fonts/
+report/*.pdf
+report/report.html
