@@ -46,6 +46,7 @@ const dims = (file) => {
 // 1.8, not 1.4: a phone capture is 402x874 (2.17), while a long desktop page
 // can reach 1.45 and must still be laid out full width to stay readable.
 const isPhone = (s) => { const { w, h } = dims(s.file); return h > w * 1.8; };
+const wbr = (u) => esc(u).replace(/\//g, "/<wbr>").replace(/-/g, "-<wbr>");
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const figure = (s, i) => `
@@ -177,6 +178,8 @@ const emailFor = (org, role) => {
   return row?.email ?? "";
 };
 
+const slugFor = (org) => creds.find((c) => c.org === org)?.slug ?? "";
+
 const orgScreens = (org) => {
   const bill = orgBills[org];
   const rows = SCREENS.map((sc) => {
@@ -201,18 +204,21 @@ const orgScreens = (org) => {
   return rows;
 };
 
-const screenCard = (org, r) => `
+const screenCard = (org, r) => {
+  const url = `${LIVE}/${slugFor(org)}${r.path}`;
+  return `
   <tr>
     <td>
       <span class="screen-name">${esc(r.name)}</span>
       <span class="screen-note">${esc(r.what)}</span>
     </td>
     <td>
-      <a class="url" href="${LIVE}${r.path}">${esc(LIVE)}${esc(r.path)}</a>
+      <a class="url" href="${url}">${wbr(url)}</a>
       <span class="cred">Sign in as <b>${esc(ROLE_LABEL[r.role] ?? r.role)}</b> &nbsp;
         <span class="mono">${esc(r.email)}</span> &nbsp;·&nbsp; <span class="mono">${PASSWORD}</span></span>
     </td>
   </tr>`;
+};
 
 const g1 = gallery(byAct("guest"), 1);
 const g2 = gallery(byAct("staff"), g1.next);
@@ -302,8 +308,8 @@ const html = `<!doctype html>
   .org.flow col.c-note{ width:29% }
   .org.flow td.mono{ white-space:normal; word-break:break-all; line-height:1.45 }
   .org.flow td.role{ white-space:normal }
-  a.url{ font-family:'JetBrains Mono',monospace; font-size:8.1pt; color:#1c4fa8;
-    text-decoration:none; word-break:break-all; line-height:1.5 }
+  a.url{ font-family:'JetBrains Mono',monospace; font-size:7.8pt; color:#1c4fa8;
+    text-decoration:none; word-break:normal; overflow-wrap:break-word; line-height:1.55 }
   .screen-name{ display:block; font-weight:700; font-size:9.6pt }
   .screen-note{ display:block; font-size:8.2pt; color:var(--muted); line-height:1.4; margin-top:.4mm }
   .cred{ display:block; margin-top:1.2mm; font-size:7.9pt; color:var(--ink-2);
@@ -413,17 +419,18 @@ const html = `<!doctype html>
 
   <div class="key" style="margin-top:5mm">
     <b>Read this once, and the rest of the section makes sense.</b><br><br>
-    All three restaurants share the same web address. There is no
-    <span class="mono">/mysore-dining-hall/…</span> in the URL — <b>the login is what chooses the
-    restaurant.</b> Signing in as <span class="mono">owner@mysoredininghall.example</span> and opening
-    <span class="mono">/org/tables</span> shows you Mysore&rsquo;s floor; the same link signed in as the
-    Rooftop owner shows Rooftop&rsquo;s. That is the whole multi-tenancy model: one deployment, one set of
-    URLs, and the data separated by who you are.<br><br>
-    So: <b>to switch restaurants you must sign out first</b> — top right of any screen — and sign back in
-    with the other restaurant&rsquo;s credential. Opening a &ldquo;Rooftop&rdquo; link while still signed in
-    as Mysore will simply show you Mysore again.<br><br>
-    The one exception is the guest links. Those carry the table in the address itself, need no login, and
-    work no matter who else is signed in on that browser.
+    Every link names its restaurant:
+    <span class="mono">/mysore-dining-hall/org/tables</span> is Mysore&rsquo;s floor,
+    <span class="mono">/rooftop-all-day/org/tables</span> is Rooftop&rsquo;s. One deployment, one codebase,
+    the restaurant chosen by the address.<br><br>
+    The credential still has to match. Open Mysore&rsquo;s link signed in as a Rooftop account and you get a
+    blocking screen saying so — not Mysore&rsquo;s data. That guard is deliberate, and it is the difference
+    between multi-tenancy and a shared database. <b>To move between restaurants, sign out</b> (top right)
+    and sign back in with the credential printed under the link you want.<br><br>
+    The master admin login is the exception: it belongs to no restaurant, so it opens any of these links
+    and shows a black banner naming the one you are looking at.<br><br>
+    Guest links need no login at all — they carry the table in the address and work regardless of who else
+    is signed in.
   </div>
 
   <p class="intro" style="margin-top:5mm">Two more things worth knowing before you start:</p>
@@ -502,7 +509,7 @@ ${Object.keys(live).sort((a, b) => (a.startsWith('Mysore') ? -1 : b.startsWith('
           ["Module registry", "/admin/modules", "What modules exist, and how many organizations have each switched on."],
         ].map(([n, path, what]) => `<tr>
           <td><span class="screen-name">${esc(n)}</span><span class="screen-note">${esc(what)}</span></td>
-          <td><a class="url" href="${LIVE}${path}">${esc(LIVE)}${esc(path)}</a>
+          <td><a class="url" href="${LIVE}${path}">${wbr(`${LIVE}${path}`)}</a>
             <span class="cred">Sign in as <b>master admin</b> &nbsp;<span class="mono">vinipos.mas-admin@vinipos.com</span>
               &nbsp;·&nbsp; <span class="mono">operator1234%</span></span></td>
         </tr>`).join("")}
@@ -512,7 +519,7 @@ ${Object.keys(live).sort((a, b) => (a.startsWith('Mysore') ? -1 : b.startsWith('
 
   <div class="key">
     <b>The single most worthwhile link in this report.</b><br>
-    <a class="url" href="${LIVE}/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83">${LIVE}/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83</a><br><br>
+    <a class="url" href="${LIVE}/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83">${wbr(`${LIVE}/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83`)}</a><br><br>
     That is the workflow canvas scoped to <b>Rooftop All Day Kitchen</b> — the one restaurant whose flow has
     never been applied. Press <b>Apply to org</b>, and instead of a screenshot you get a live diff of exactly
     which role is about to gain which module. The passcode is <span class="mono">${PASSCODE}</span>.
@@ -534,16 +541,16 @@ ${Object.keys(live).sort((a, b) => (a.startsWith('Mysore') ? -1 : b.startsWith('
       <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
       <tbody>
         ${[
-          ["Order history", "/org/orders"], ["Delivery", "/org/delivery"],
-          ["Inventory", "/org/inventory"], ["Customers & CRM", "/org/customers"],
-          ["Payments", "/org/payments"], ["Reports", "/org/reports"],
-          ["Permissions", "/org/roles"], ["Locations", "/org/locations"],
-          ["Settings", "/org/settings"], ["Platform users", "/admin/users"],
+          ["Order history", "/mysore-dining-hall/org/orders"], ["Delivery", "/mysore-dining-hall/org/delivery"],
+          ["Inventory", "/mysore-dining-hall/org/inventory"], ["Customers & CRM", "/mysore-dining-hall/org/customers"],
+          ["Payments", "/mysore-dining-hall/org/payments"], ["Reports", "/mysore-dining-hall/org/reports"],
+          ["Permissions", "/mysore-dining-hall/org/roles"], ["Locations", "/mysore-dining-hall/org/locations"],
+          ["Settings", "/mysore-dining-hall/org/settings"], ["Platform users", "/admin/users"],
           ["Platform locations", "/admin/locations"], ["Platform operations", "/admin/operations"],
           ["Platform settings", "/admin/settings"], ["Support", "/admin/support"],
         ].map(([n, path]) => `<tr class="off">
           <td><span class="screen-name">${esc(n)}</span></td>
-          <td><a class="url" href="${LIVE}${path}">${esc(LIVE)}${esc(path)}</a></td>
+          <td><a class="url" href="${LIVE}${path}">${wbr(`${LIVE}${path}`)}</a></td>
         </tr>`).join("")}
       </tbody>
     </table>
