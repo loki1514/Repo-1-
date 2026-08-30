@@ -22,7 +22,8 @@ mkdirSync(OUT, { recursive: true });
 
 const QR_BLANK = "c7c91b3e8b";       // Table 29 — no session, shows the welcome gate
 const DEMO_TABLE = "29";             // the table the whole journey runs on
-const ORG_ID = "91fab9e6-6e16-49ca-8bb7-8c6d0c97f36d";
+const ORG_ID = "91fab9e6-6e16-49ca-8bb7-8c6d0c97f36d";        // Mysore — the flow is already applied here
+const ORG_UNAPPLIED = process.env.REPORT_DIFF_ORG ?? "";   // an org whose flow has NOT been applied, so the diff is real
 
 const OWNER = { email: "owner@mysoredininghall.example", password: "Vini@2026" };
 const CAPTAIN = { email: "captain@mysoredininghall.example", password: "Vini@2026" };
@@ -38,14 +39,33 @@ const HIDE_DEV_CHROME = `
   nextjs-portal, [data-nextjs-toast], #__next-build-watcher { display: none !important; }
 `;
 
+let currentAct = "guest";
 async function shot(page, name, caption, { full = false } = {}) {
   n += 1;
   const file = `${String(n).padStart(2, "0")}-${name}.png`;
   await page.addStyleTag({ content: HIDE_DEV_CHROME }).catch(() => {});
   // A beat for transitions and lazy paint; the sheets animate in over 340ms.
   await page.waitForTimeout(700);
-  await page.screenshot({ path: join(OUT, file), fullPage: full });
-  shots.push({ file, name, caption });
+
+  const restore = page.viewportSize();
+  if (full) {
+    // Not fullPage: the org shell pins its sidebar with position:fixed, and a
+    // fullPage capture stitches beyond the viewport without extending fixed
+    // elements — leaving the sidebar cut off at a hard edge with white below.
+    // Growing the viewport to the document height makes the whole page real.
+    const h = await page.evaluate(() =>
+      Math.ceil(Math.max(document.body.scrollHeight, document.documentElement.scrollHeight)),
+    );
+    // Cap it: a very long page rendered at one height becomes unreadable once
+    // it is scaled into a print column.
+    await page.setViewportSize({ width: restore.width, height: Math.min(h + 24, 2200) });
+    await page.waitForTimeout(600);
+  }
+
+  await page.screenshot({ path: join(OUT, file) });
+  if (full) await page.setViewportSize(restore);
+
+  shots.push({ file, name, caption, act: currentAct });
   console.log(`  ✓ ${file}`);
 }
 
@@ -140,10 +160,35 @@ async function guestOrderId() {
   }
 }
 
+/**
+ * Bumps the KOT card belonging to one order. Cards are matched by their KOT
+ * number rather than position, because the board reorders as tickets move
+ * between columns.
+ */
+async function bumpTicketFor(page, orderId, label) {
+  const ok = await page.evaluate(
+    ({ label }) => {
+      const cards = [...document.querySelectorAll("article, li, div")].filter((el) =>
+        [...el.querySelectorAll("button")].some((b) => b.textContent.trim() === label),
+      );
+      // The innermost element that owns the button is the ticket card.
+      const card = cards.sort((a, b) => a.querySelectorAll("*").length - b.querySelectorAll("*").length)[0];
+      const btn = card && [...card.querySelectorAll("button")].find((b) => b.textContent.trim() === label);
+      if (!btn) return false;
+      btn.click();
+      return true;
+    },
+    { label },
+  );
+  if (!ok) throw new Error(`no "${label}" button on the pass`);
+  await page.waitForTimeout(2600);
+}
+
 const browser = await chromium.launch();
 
 // ---------------------------------------------------------------------------
 console.log("\nAct 1 — the guest");
+currentAct = "guest";
 // ---------------------------------------------------------------------------
 {
   const ctx = await browser.newContext({
@@ -200,6 +245,7 @@ console.log("\nAct 1 — the guest");
 
 // ---------------------------------------------------------------------------
 console.log("\nAct 2 — the restaurant");
+currentAct = "staff";
 // ---------------------------------------------------------------------------
 let billUrl = null;
 {
@@ -207,13 +253,14 @@ let billUrl = null;
   const page = await ctx.newPage();
   await login(page, OWNER);
 
+  const orderId = await guestOrderId();
+
   await page.goto(`${BASE}/org`, { waitUntil: "networkidle" });
   await shot(page, "staff-overview", "Where a manager lands. Real numbers, and an exit to whichever screen the shift needs.");
 
   await page.goto(`${BASE}/org/tables`, { waitUntil: "networkidle" });
-  await shot(page, "staff-floor", "The floor. Table 29 is now running with the guest's order — and their water request is in Guests Calling.", { full: true });
+  await shot(page, "staff-floor", "The floor. Table 29 is now running with the guest's order — and their water request has arrived under Guests calling.", { full: true });
 
-  const orderId = await guestOrderId();
   const href = `/org/bills/${orderId}`;
   if (href) {
     billUrl = `${BASE}${href}`;
@@ -224,10 +271,19 @@ let billUrl = null;
   }
 
   await page.goto(`${BASE}/org/kds`, { waitUntil: "networkidle" });
-  await shot(page, "staff-kds", "The pass. Read at two metres by someone holding a pan — large type, 44px targets, borders that redden with age rather than by station.", { full: true });
+  await shot(page, "staff-kds", "The pass, the moment the ticket lands. Read at two metres by someone holding a pan — large type, 44px targets, borders that redden with age rather than by station.", { full: true });
+
+  // Cook it and send it out, so the floor and the guest's phone have something
+  // true to show. Without this the report claims a bump that never happened.
+  await bumpTicketFor(page, orderId, "Start cooking");
+  await bumpTicketFor(page, orderId, "Food is ready");
+  await shot(page, "staff-kds-ready", "The same ticket after the kitchen bumps it. Every line is ticked and the card moves to Ready — which is what tells the floor to run the food.", { full: true });
+
+  await page.goto(`${BASE}/org/tables`, { waitUntil: "networkidle" });
+  await shot(page, "staff-floor-ready", "The floor, seconds later. Table 29 has flipped to Food ready with a count of what is waiting to be run.", { full: true });
 
   await page.goto(`${BASE}/org/live`, { waitUntil: "networkidle" });
-  await shot(page, "staff-live", "Ball by ball. Every event from the journey above is in the timeline, attributed to guest, captain, kitchen or POS.", { full: true });
+  await shot(page, "staff-live", "Ball-by-ball. Every event from the journey above is here, attributed to whoever caused it — the guest, the kitchen, or the admin who fired the ticket.", { full: true });
 
   await page.goto(`${BASE}/org/channels`, { waitUntil: "networkidle" });
   await shot(page, "staff-channels", "Aggregator store on/off and per-item availability. Switching a dish off here removes it from the guest's live menu.", { full: true });
@@ -236,10 +292,10 @@ let billUrl = null;
   await shot(page, "staff-qr", "A real QR per table, grouped by area. Tokens are random, not table ids — an id would let anyone order to any table.");
 
   await page.goto(`${BASE}/org/pos`, { waitUntil: "networkidle" });
-  await shot(page, "staff-pos", "Counter billing for walk-ins and phone orders, alongside the table-driven flow.");
+  await shot(page, "staff-pos", "Counter billing, for the walk-in who never scans anything. Same menu, same bill arithmetic, no table session.");
 
   await page.goto(`${BASE}/org/menu-items`, { waitUntil: "networkidle" });
-  await shot(page, "staff-menu", "The catalog behind every other screen — categories, prices, variants, availability.");
+  await shot(page, "staff-menu", "The catalogue behind every other screen. A price changed here is the price the guest's phone quotes on the next load.");
 
   if (billUrl) {
     await page.goto(`${billUrl}/print`, { waitUntil: "networkidle" });
@@ -257,7 +313,23 @@ let billUrl = null;
 }
 
 // ---------------------------------------------------------------------------
+console.log("\nAct 2b — back to the guest");
+currentAct = "payoff";
+// ---------------------------------------------------------------------------
+{
+  const ctx = await browser.newContext({
+    viewport: PHONE, deviceScaleFactor: 2, colorScheme: "light", isMobile: true, hasTouch: true,
+  });
+  const page = await ctx.newPage();
+  await page.goto(`${BASE}/t/${QR_BLANK}`, { waitUntil: "networkidle" });
+  await clickText(page, "My Orders");
+  await shot(page, "guest-ready", "The same phone, unchanged and unrefreshed by the guest. The kitchen's bump has reached the table: every dish now reads On its way.");
+  await ctx.close();
+}
+
+// ---------------------------------------------------------------------------
 console.log("\nAct 3 — the control plane");
+currentAct = "admin";
 // ---------------------------------------------------------------------------
 {
   const ctx = await browser.newContext({ viewport: DESK, deviceScaleFactor: 2, colorScheme: "light" });
@@ -265,26 +337,32 @@ console.log("\nAct 3 — the control plane");
   await login(page, ADMIN);
 
   await page.goto(`${BASE}/admin`, { waitUntil: "networkidle" });
-  await shot(page, "admin-dashboard", "Every organization on the platform, with real counts across all tenants.");
+  await shot(page, "admin-dashboard", "The platform view: 49 tables and 22 staff accounts across every tenant, not just the three demo restaurants.");
 
   await page.goto(`${BASE}/admin/organizations`, { waitUntil: "networkidle" });
-  await shot(page, "admin-orgs", "One repo, one deploy, tenancy in the data. Each row is a restaurant with its own theme, modules and staff.");
+  await shot(page, "admin-orgs", "One repo, one deployment, tenancy in the data. Seven organizations — the three demo restaurants, plus older investor rows carried over from earlier work.");
 
   await page.goto(`${BASE}/admin/workflows?org=${ORG_ID}`, { waitUntil: "networkidle" });
-  await shot(page, "admin-workflows", "The workflow builder, scoped to one restaurant. This is the hub the rest of the product is configured from.", { full: true });
+  await shot(page, "admin-workflows", "The workflow builder, scoped to one restaurant. Module blocks name the screens a journey touches, and the roles on each block are who keeps them.", { full: true });
 
+  // Deliberately a restaurant the flow has NOT been applied to. Mysore was
+  // applied earlier in the build, so its panel reads "Nothing to apply" — a
+  // screenshot of an empty diff is no evidence of anything.
+  if (!ORG_UNAPPLIED) throw new Error("set REPORT_DIFF_ORG to an org whose dine-in flow is unapplied");
+  await page.goto(`${BASE}/admin/workflows?org=${ORG_UNAPPLIED}`, { waitUntil: "networkidle" });
   await clickText(page, "Apply to org", { exact: false });
-  await page.waitForTimeout(2500);
-  await shot(page, "admin-apply", "The diff before anything moves: which modules switch on, and exactly which role gains or loses which screen. A passcode gates the write.");
+  await page.waitForTimeout(3000);
+  await shot(page, "admin-apply", "The diff, before anything moves: which modules switch on, and exactly which role gains or loses which module. The passcode field below is the second lock.");
 
   await page.goto(`${BASE}/admin/roles`, { waitUntil: "networkidle" });
-  await shot(page, "admin-roles", "The same permissions as a matrix, for when a flow is the wrong shape for the change.");
+  await shot(page, "admin-roles", "The same permissions as a matrix, for the change that is one tick rather than a redrawn journey.");
 
   await ctx.close();
 }
 
 // ---------------------------------------------------------------------------
 console.log("\nAct 4 — the proof");
+currentAct = "proof";
 // ---------------------------------------------------------------------------
 {
   const ctx = await browser.newContext({ viewport: DESK, deviceScaleFactor: 2, colorScheme: "light" });

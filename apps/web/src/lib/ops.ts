@@ -33,6 +33,8 @@ export type TableState = {
   guestCount: number;
   pendingItems: number;
   readyItems: number;
+  /** Unsettled orders on this table from an earlier sitting. */
+  orphanedOrders: number;
 };
 
 export type KotLine = {
@@ -103,7 +105,11 @@ export async function listFloor(orgId: string): Promise<TableState[]> {
       .from("orders")
       .select("id, display_no, table_id, session_id, status, total, guest_count, created_at")
       .eq("organization_id", orgId)
-      .in("status", ["new", "in_billing", "sent_to_kitchen", "ready", "awaiting_payment"]),
+      .in("status", ["new", "in_billing", "sent_to_kitchen", "ready", "awaiting_payment"])
+      // Unordered, this query made "the table's bill" mean whichever row the
+      // database returned first — so tapping a table could open a stale order
+      // from a previous sitting while the card showed the current one's total.
+      .order("created_at", { ascending: false }),
     supabaseAdmin
       .from("table_sessions")
       .select("id, table_id, pin, guest_count, opened_at, status")
@@ -122,8 +128,17 @@ export async function listFloor(orgId: string): Promise<TableState[]> {
   const sessionByTable = new Map((sessions.data ?? []).map((s) => [s.table_id, s]));
 
   return (tables.data ?? []).map((t) => {
-    const mine = openOrders.filter((o) => o.table_id === t.id);
     const session = sessionByTable.get(t.id) ?? null;
+
+    // Scope to the live sitting where there is one. A table can carry orders
+    // from an earlier party that were never settled; summing those into the
+    // running total showed the biller a figure the guest's own phone had never
+    // seen, next to the current party's PIN. The card must describe one bill.
+    const onTable = openOrders.filter((o) => o.table_id === t.id);
+    const mine = session
+      ? onTable.filter((o) => o.session_id === session.id)
+      : onTable;
+    const orphaned = onTable.length - mine.length;
 
     const amount = mine.reduce((s, o) => s + Number(o.total), 0);
     const counts = mine.reduce(
@@ -166,6 +181,7 @@ export async function listFloor(orgId: string): Promise<TableState[]> {
       guestCount: session?.guest_count ?? primary?.guest_count ?? 0,
       pendingItems: counts.pending,
       readyItems: counts.ready,
+      orphanedOrders: orphaned,
     };
   });
 }

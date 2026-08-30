@@ -152,9 +152,18 @@ function Tile({
       <div className="relative z-10">
         <span
           className="flex h-9 w-9 items-center justify-center rounded-[12px]"
-          style={{ background: alert ? "var(--ok)" : "#14170f" }}
+          // The tile used a hardcoded near-black with a --lime glyph. Under a
+          // themed org --lime is that org's accent, so a red restaurant got
+          // dark red on near-black and three of four icons vanished. Painting
+          // the tile in the accent and the glyph in --lime-ink borrows the
+          // contrast solver in lib/theme.ts, which guarantees 3.05:1 for any
+          // accent the picker can produce.
+          style={{
+            background: alert ? "var(--ok)" : "var(--lime)",
+            color: alert ? "#0b1a0f" : "var(--lime-ink)",
+          }}
         >
-          <Icon size={16} style={{ color: alert ? "#fff" : "var(--lime)" }} />
+          <Icon size={16} />
         </span>
         <p className="tnum mt-3 text-[26px] font-extrabold leading-none tracking-tight">{value}</p>
         <p className="mt-1.5 text-[13px] font-bold">{label}</p>

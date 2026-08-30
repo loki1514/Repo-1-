@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { execSync } from "node:child_process";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const shots = JSON.parse(readFileSync(join(HERE, "shots/manifest.json"), "utf8"));
@@ -19,16 +20,31 @@ const FONT_CSS = readFileSync(join(HERE, "fonts/inline.css"), "utf8");
 const perms = JSON.parse(readFileSync("/tmp/perms.json", "utf8"));
 
 const BUILT = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+const git = (cmd) => { try { return execSync(cmd, { cwd: HERE, encoding: "utf8" }).trim(); } catch { return "?"; } };
+const REF = `${git("git rev-parse --abbrev-ref HEAD")} @ ${git("git rev-parse --short HEAD")}`;
 const PASSWORD = "Vini@2026";
 const PASSCODE = "vini-builder-2026";
 
-const byPrefix = (p) => shots.filter((s) => s.name.startsWith(p));
-const isPhone = (s) => /guest|captain|tenant/.test(s.name);
+// Grouped by the act recorded at capture time. Prefix-matching broke the
+// moment a shot's subject (the guest's phone) belonged to a later act.
+const byAct = (a) => shots.filter((s) => (s.act ?? s.name.split('-')[0]) === a);
+// Keyed off the actual image, not the filename: 25-proof-captain is a desktop
+// capture whose name matched the phone pattern, so a full dashboard was being
+// crushed into a half-column and rendered illegible.
+const dims = (file) => {
+  const out = execSync(`sips -g pixelWidth -g pixelHeight "${join(HERE, "shots", file)}"`, { encoding: "utf8" });
+  const w = Number(out.match(/pixelWidth:\s*(\d+)/)?.[1] ?? 0);
+  const h = Number(out.match(/pixelHeight:\s*(\d+)/)?.[1] ?? 0);
+  return { w, h };
+};
+// 1.8, not 1.4: a phone capture is 402x874 (2.17), while a long desktop page
+// can reach 1.45 and must still be laid out full width to stay readable.
+const isPhone = (s) => { const { w, h } = dims(s.file); return h > w * 1.8; };
 const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const figure = (s, i) => `
   <figure class="shot ${isPhone(s) ? "phone" : "wide"}">
-    <img src="opt/${s.file.replace(/\.png$/, ".jpg")}" alt="${esc(s.caption)}">
+    <img src="opt/${s.file.replace(/\.png$/, ".jpg")}" alt="Screenshot ${i}: ${esc(s.name.replace(/-/g, " "))}">
     <figcaption><span class="num">${String(i).padStart(2, "0")}</span>${esc(s.caption)}</figcaption>
   </figure>`;
 
@@ -78,15 +94,10 @@ const orgBlock = (org) => {
         </tr>`).join("")}
       </tbody>
     </table>
-    ${link ? `<p class="qr-line">Guest QR · table ${esc(link.label)} → <span class="mono">/t/${esc(link.qr_token)}</span></p>` : ""}
+    ${link ? `<p class="qr-line">Guest QR · table ${esc(link.label)} → <span class="mono">/t/${esc(link.qr_token)}</span>${
+       org.startsWith("Mysore") ? ` &nbsp;·&nbsp; table 29 → <span class="mono">/t/c7c91b3e8b</span> — the table this report walks through` : ""
+     }</p>` : ""}
   </div>`;
-};
-
-const MODULE_LABEL = {
-  dashboard: "Dashboard", orders: "Orders", pos: "POS / Billing",
-  kds_kot: "Kitchen display", menu: "Menu", inventory: "Inventory",
-  finance: "Finance", marketing_crm: "Marketing & CRM", staff: "Staff",
-  settings: "Settings",
 };
 
 const permFor = (org, role) => perms.find((p) => p.org === org && p.role === role);
@@ -95,15 +106,17 @@ const permFor = (org, role) => perms.find((p) => p.org === org && p.role === rol
 function seesCell(org, role) {
   const row = permFor(org, role);
   if (!row?.sees) return '<span class="dim">Nothing — every module is switched off</span>';
-  const mods = row.sees.split(",");
-  const canvas = new Set((row.from_canvas ?? "").split(",").filter(Boolean));
 
-  const body = mods.length >= 9
-    ? "Every module"
-    : mods.map((m) => {
-        const label = MODULE_LABEL[m] ?? m;
-        return canvas.has(m) ? `<b class="granted">${label}</b>` : label;
-      }).join(", ");
+  // Listed in full, never summarised as "Every module". That shortcut fired on
+  // a count and so claimed Brew & Bite's manager could open Finance — a module
+  // that organization has switched off. Names come from the module registry.
+  const canvas = new Set((row.from_canvas ?? "").split("|").filter(Boolean).flatMap((l) => [l, l.replace(/\s*\(KDS\/KOT\)/, "").replace("POS / Billing", "POS")]));
+  const short = (label) => label.replace(/\s*\(KDS\/KOT\)/, "").replace("POS / Billing", "POS");
+  const body = row.sees
+    .split("|")
+    .map(short)
+    .map((label) => (canvas.has(short(label)) || canvas.has(label) ? `<b class="granted">${esc(label)}</b>` : esc(label)))
+    .join(", ");
 
   const note = canvas.size
     ? `<span class="granted-note">Bold: granted by applying the dine-in flow on the canvas.</span>`
@@ -111,10 +124,11 @@ function seesCell(org, role) {
   return body + note;
 }
 
-const g1 = gallery(byPrefix("guest-"), 1);
-const g2 = gallery(byPrefix("staff-"), g1.next);
-const g3 = gallery(byPrefix("admin-"), g2.next);
-const g4 = gallery(byPrefix("proof-"), g3.next);
+const g1 = gallery(byAct("guest"), 1);
+const g2 = gallery(byAct("staff"), g1.next);
+const gPayoff = gallery(byAct("payoff"), g2.next);
+const g3 = gallery(byAct("admin"), gPayoff.next);
+const g4 = gallery(byAct("proof"), g3.next);
 
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -126,8 +140,15 @@ const html = `<!doctype html>
     --paper:#ffffff; --paper-2:#f5f5f1;
     --line:rgb(18 21 15 / .12); --hair:rgb(18 21 15 / .07);
     --lime:#b4ee2a; --lime-deep:#5f9a08; --lime-ink:#1a2800;
+    /* #5f9a08 is 3.43:1 on white — fine for the 22pt headings it also
+       tints, but every small use (7.4-8pt labels) needs AA. */
+    --lime-text:#41690a;
   }
-  @page{ size:A4; margin:0 }
+  /* The running footer needs 12mm; giving it to @page means EVERY page keeps
+     a real top and bottom margin, including the continuation pages a long
+     section flows onto — those were butting the trim edge. */
+  @page{ size:A4; margin:16mm 0 12mm }
+  @page:first{ margin:0 }
   *{ box-sizing:border-box; margin:0; padding:0 }
   body{
     font-family:'Plus Jakarta Sans',ui-sans-serif,system-ui,sans-serif;
@@ -135,11 +156,14 @@ const html = `<!doctype html>
     font-size:9.6pt; line-height:1.62; -webkit-font-smoothing:antialiased;
   }
   .mono{ font-family:'JetBrains Mono',ui-monospace,monospace; font-size:8.6pt; letter-spacing:-.01em }
-  .page{ width:210mm; min-height:285mm; padding:18mm 17mm 10mm; page-break-after:always; position:relative }
+  .page{ width:210mm; padding:0 17mm; page-break-after:always; position:relative }
   .page:last-child{ page-break-after:auto }
 
   /* ---- cover ---- */
-  .cover{ background:#0c0f08; color:#f3f6ec; display:flex; flex-direction:column; justify-content:space-between }
+  /* The cover is the one full-bleed page — @page:first removes its margins
+     so the dark field reaches the trim on all four sides. */
+  .cover{ background:#0c0f08; color:#f3f6ec; display:flex; flex-direction:column;
+    justify-content:space-between; min-height:297mm; padding:20mm 17mm 16mm }
   .cover .mark{ width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center;
     background:linear-gradient(180deg,#d6ff63,#79bc0d); color:var(--lime-ink); font-weight:800; font-size:20pt }
   .cover h1{ font-size:40pt; line-height:1.02; letter-spacing:-.035em; font-weight:800; margin-top:14mm }
@@ -152,7 +176,7 @@ const html = `<!doctype html>
   .cover footer{ font-size:8.6pt; color:#98a08c; display:flex; justify-content:space-between; align-items:flex-end }
 
   /* ---- structure ---- */
-  .kicker{ font-size:7.6pt; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--lime-deep) }
+  .kicker{ font-size:7.6pt; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--lime-text) }
   h2{ font-size:22pt; font-weight:800; letter-spacing:-.03em; line-height:1.1; margin:2mm 0 4mm }
   h3{ font-size:11.5pt; font-weight:800; letter-spacing:-.015em }
   .intro{ font-size:10.6pt; color:var(--ink-2); max-width:150mm; line-height:1.6 }
@@ -164,24 +188,25 @@ const html = `<!doctype html>
   .shot.phone img{ border-radius:9px }
   .pair{ display:grid; grid-template-columns:1fr 1fr; gap:7mm; break-inside:avoid }
   figcaption{ font-size:8.6pt; color:var(--ink-2); line-height:1.5; margin-top:2.6mm; display:flex; gap:2.4mm }
-  .num{ font-family:'JetBrains Mono',monospace; font-size:7.6pt; font-weight:500; color:var(--lime-deep);
+  .num{ font-family:'JetBrains Mono',monospace; font-size:7.6pt; font-weight:500; color:var(--lime-text);
     padding-top:.4mm; flex:none }
 
   /* ---- credentials ---- */
-  .org{ break-inside:avoid; margin-bottom:7mm; border:1px solid var(--line); border-radius:7px; overflow:hidden }
-  .org-head{ display:flex; align-items:center; gap:3mm; padding:3.4mm 4mm; background:var(--paper-2);
+  .org{ break-inside:avoid; margin-bottom:5mm; border:1px solid var(--line); border-radius:7px; overflow:hidden }
+  .org-head{ display:flex; align-items:center; gap:3mm; padding:2.6mm 4mm; background:var(--paper-2);
     border-bottom:1px solid var(--hair) }
   .swatch{ width:11px; height:11px; border-radius:3px; flex:none; box-shadow:inset 0 0 0 1px rgb(0 0 0 / .12) }
   .org-meta{ margin-left:auto; font-size:8.2pt; color:var(--muted); font-weight:600 }
   table.creds{ width:100%; border-collapse:collapse }
   table.creds th{ text-align:left; font-size:7.4pt; text-transform:uppercase; letter-spacing:.1em;
     color:var(--muted); padding:2.6mm 4mm 1.6mm; font-weight:800 }
-  table.creds td{ padding:2mm 4mm; border-top:1px solid var(--hair); vertical-align:top }
+  table.creds td{ padding:1.5mm 4mm; border-top:1px solid var(--hair); vertical-align:top }
+  table.creds td.mono{ white-space:nowrap }
   td.role{ font-weight:700; text-transform:capitalize; white-space:nowrap }
   td.dim{ color:var(--muted); font-size:8.4pt }
   .granted{ color:var(--ink); font-weight:700 }
-  .granted-note{ display:block; margin-top:1mm; font-size:7.4pt; color:var(--lime-deep); font-weight:600 }
-  .qr-line{ padding:2.6mm 4mm; border-top:1px solid var(--hair); font-size:8.6pt; color:var(--ink-2); background:var(--paper-2) }
+  .granted-note{ display:block; margin-top:1mm; font-size:7.4pt; color:var(--lime-text); font-weight:600 }
+  .qr-line{ padding:2mm 4mm; border-top:1px solid var(--hair); font-size:8.6pt; color:var(--ink-2); background:var(--paper-2) }
 
   /* ---- callouts ---- */
   .key{ border-left:3px solid var(--lime-deep); background:var(--paper-2); padding:4mm 5mm; border-radius:0 6px 6px 0;
@@ -191,7 +216,7 @@ const html = `<!doctype html>
   ol.steps{ counter-reset:s; list-style:none; margin-top:3mm }
   ol.steps li{ counter-increment:s; position:relative; padding-left:9mm; margin-bottom:3.4mm; break-inside:avoid }
   ol.steps li::before{ content:counter(s,decimal-leading-zero); position:absolute; left:0; top:.2mm;
-    font-family:'JetBrains Mono',monospace; font-size:8pt; font-weight:500; color:var(--lime-deep) }
+    font-family:'JetBrains Mono',monospace; font-size:8pt; font-weight:500; color:var(--lime-text) }
   ul.plain{ list-style:none } ul.plain li{ padding-left:5mm; position:relative; margin-bottom:2mm }
   ul.plain li::before{ content:''; position:absolute; left:0; top:2.4mm; width:2.4mm; height:2.4mm;
     border-radius:1px; background:var(--lime-deep) }
@@ -208,18 +233,19 @@ const html = `<!doctype html>
   <div>
     <div class="mark">V</div>
     <h1>The whole service,<br><em>QR to printed bill.</em></h1>
-    <p class="lede">Vini POS now runs a restaurant end to end. One guest journey crosses five screens
-      that all read the same data — scan, order, cook, serve, settle. This is the walkthrough,
-      captured from a live session, with every credential you need to repeat it.</p>
+    <p class="lede">The dine-in service now runs end to end. One guest journey crosses five screens
+      that all read the same data — scan, order, cook, serve, settle. This is that walkthrough,
+      captured from a single live session, with every credential you need to repeat it and an honest
+      account of what is still a stub.</p>
     <div class="facts">
-      <div><b>26</b><span>Screens captured</span></div>
+      <div><b>${shots.length}</b><span>Screens captured</span></div>
       <div><b>3</b><span>Demo restaurants</span></div>
       <div><b>15</b><span>Staff logins</span></div>
       <div><b>41</b><span>Tables with QR</span></div>
     </div>
   </div>
   <footer>
-    <div>Vini POS · Restaurant Operations · <span class="mono">main @ 20c1b8d</span></div>
+    <div>Vini POS · Restaurant Operations · <span class="mono">${REF}</span></div>
     <div>${BUILT}</div>
   </footer>
 </section>
@@ -229,17 +255,23 @@ const html = `<!doctype html>
   <div class="kicker">Section 01</div>
   <h2>Credentials</h2>
   <div class="rule"></div>
-  <p class="intro">Every account below uses the same password. These are demo accounts on
-    <span class="mono">.example</span> domains — they cannot receive mail, which is deliberate:
-    nothing here can be mistaken for a real customer.</p>
+  <p class="intro">The fifteen staff accounts share one password and live on
+    <span class="mono">.example</span> domains, so none of them can receive mail — deliberate, so
+    nothing here can be mistaken for a real account. The master admin is separate: its own
+    password, and the only login that reaches the platform side.</p>
 
   <div class="key">
     <b>Password for all 15 staff accounts:</b> <code>${PASSWORD}</code><br>
-    <b>Master admin:</b> <code>vinipos.mas-admin@vinipos.com</code> / <code>operator1234%</code><br>
+    <b>Master admin:</b> <code>vinipos.mas-admin@vinipos.com</code> / <code>operator1234%</code>
+    <span class="dim">— the page is titled Master Admin, the account header reads Super Admin; same login.</span><br>
     <b>Workflow builder passcode:</b> <code>${PASSCODE}</code> — the second lock on anything that moves permissions.
   </div>
 
   ${orgs.map(orgBlock).join("\n")}
+
+  <p class="intro" style="font-size:9pt; margin-top:-3mm">These are <em>modules</em>, not screens —
+    one module gates several sidebar entries. Orders covers the floor, the captain and order history;
+    Dashboard covers Overview and Live Operations.</p>
 
   <div class="key">
     <b>The guest side needs no login at all.</b> The QR token is the credential for the table, and the
@@ -278,7 +310,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
   <ol class="steps">
     <li>A guest scans the sticker on table 29 and opens the table.</li>
     <li>They pick a size, build a cart, and see the all-in total before committing.</li>
-    <li>The order lands on the restaurant's floor view within a minute, with the table's PIN.</li>
+    <li>The order lands on the floor view inside fifteen seconds — that is the refresh interval — with the table's PIN.</li>
     <li>The biller opens the bill — identical totals, to the paisa — and fires the KOT.</li>
     <li>The kitchen display picks it up; the kitchen bumps it to ready.</li>
     <li>The floor flips to "food ready", and the guest's own phone says "on its way".</li>
@@ -306,6 +338,9 @@ node scripts/seed-restaurants.mjs --remove</pre>
     screens comes from one function — five surfaces quote a price, and if any two rounded differently
     there would be an argument at the table.</p>
   <div style="margin-top:7mm">${g2.html}</div>
+  <h3 style="margin-top:4mm">And back at the table</h3>
+  <p class="intro" style="margin-top:2mm">The guest never refreshed anything.</p>
+  <div style="margin-top:5mm">${gPayoff.html}</div>
 </section>
 
 <!-- ACT 3 -->
@@ -313,8 +348,9 @@ node scripts/seed-restaurants.mjs --remove</pre>
   <div class="kicker">Section 05 · Act three</div>
   <h2>The control plane</h2>
   <div class="rule"></div>
-  <p class="intro">One repo, one deployment, tenancy in the data. The workflow canvas is not
-    documentation of how the product is configured — it is how the product is configured.</p>
+  <p class="intro">The workflow canvas is not documentation of how the product is configured —
+    it is how the product is configured. What follows is that claim being tested on a restaurant
+    the flow had never been applied to.</p>
   <div style="margin-top:7mm">${g3.html}</div>
 </section>
 
@@ -346,7 +382,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
         <li>Captain's phone ordering, firing straight to the kitchen</li>
         <li>Bill, split payment, change, and an 80mm thermal print</li>
         <li>Ball-by-ball live operations board with an audit timeline</li>
-        <li>Store on/off and per-item, per-channel availability</li>
+        <li>Per-item availability, enforced on the guest menu — switch a dish off and it disappears from the table’s phone</li>
         <li>QR generation, regeneration and printable sheets</li>
         <li>Workflow canvas that writes real modules and permissions</li>
       </ul>
@@ -357,10 +393,16 @@ node scripts/seed-restaurants.mjs --remove</pre>
         <li class="no"><b>Swiggy and Zomato are modelled, not connected.</b> Store on/off, commission
           and aggregator orders all work — against our own data. Real orders need partner API
           credentials and a webhook.</li>
-        <li class="no">Submodule tick-lists are descriptive; modules hide, individual screens inside
-          them do not.</li>
+        <li class="no">Access is per module, not per screen. Ticking individual screens inside a module
+          is possible in the builder but nothing enforces it — hiding Orders hides the floor, the captain
+          and order history together, or not at all.</li>
         <li class="no">Rule and approval nodes on the canvas are drawn but not enforced at runtime.</li>
-        <li class="no">Order history, inventory, CRM, payments, reports and settings are still stubs.</li>
+        <li class="no">Nine screens are still placeholders: Order History, Delivery, Inventory,
+          Customers &amp; CRM, Payments, Reports, Settings, Locations and Permissions. They route and
+          render a &ldquo;planned&rdquo; page rather than 404.</li>
+        <li class="no"><b>Store on/off is a switch, not a gate.</b> Turning Swiggy off records the state
+          and shows the reopen time, but nothing in the ordering path consults it — no order is refused.
+          Per-item switch-offs are read for the QR menu only.</li>
         <li class="no">No deployment yet — see the next section.</li>
       </ul>
     </div>
@@ -368,9 +410,12 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
   <div class="key" style="margin-top:7mm">
     <b>Two tenancy holes were found and closed during this build.</b> <code>setLineStatus</code> and
-    <code>fireKot</code> both accepted an organization id and never filtered on it, so a forged uuid from
-    a kitchen tablet — the least supervised device in the building — could have written to another
-    restaurant's orders. Both now verify ownership through the parent order before touching a row.
+    <code>fireKot</code> both accepted an organization id and never filtered on it, so a forged uuid could
+    have written to another restaurant&rsquo;s orders — <code>setLineStatus</code> from the kitchen tablet,
+    the least supervised device in the building, and <code>fireKot</code> from the captain&rsquo;s phone or
+    the bill screen. Both now verify ownership through the parent order before touching a row.
+    A third was found afterwards: the floor card linked the biller to whichever open order the database
+    returned first, which on a table with an unsettled earlier sitting was the wrong bill.
   </div>
 </section>
 
@@ -384,7 +429,8 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
   <h3 style="margin-top:7mm">Environment variables Vercel needs</h3>
   <p style="color:var(--ink-2); margin-top:2mm"><code>.env.local</code> never deploys. Miss the service
-    key and login returns a 500; miss the passcode and “Apply to organization” refuses to run, by design.</p>
+    key and login itself succeeds — it is the first page after it that returns a 500. Miss the
+    passcode and "Apply to organization" refuses to run, by design.</p>
 <pre>SUPABASE_URL                    NEXT_PUBLIC_SUPABASE_URL
 SUPABASE_ANON_KEY               NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY       PLATFORM_BASE_DOMAIN
@@ -401,9 +447,10 @@ ADMIN_BUILDER_PASSCODE          GROQ_API_KEY</pre>
     behind it. Nothing to run at cutover.</p>
 
   <div class="key" style="margin-top:8mm">
-    <b>The one thing worth checking first.</b> Sign in as the Mysore captain, note the sidebar, then apply
+    <b>The one thing worth checking first.</b> Sign in as the Rooftop captain, note the sidebar, then apply
     the dine-in flow from the canvas and sign in again. If the sidebar changes, the control plane is
-    genuinely wired — and everything else in this report follows from that.
+    genuinely wired rather than decorative — which is the claim in this report that is easiest to
+    doubt and quickest to test.
   </div>
 </section>
 
