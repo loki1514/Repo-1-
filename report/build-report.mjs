@@ -183,11 +183,15 @@ const routeRows = (rows, cols) => rows.map(([name, path, ...rest]) => {
   const built = rest[cols === 4 ? 1 : 0] !== "stub";
   const who = cols === 4 ? rest[0] : null;
   const note = rest[cols === 4 ? 2 : 1];
+  const url = `${LIVE}${path}`;
   return `<tr class="${built ? "" : "off"}">
-    <td class="role">${esc(name)}</td>
-    <td class="mono">${esc(path)}</td>
-    ${who ? `<td class="dim">${esc(who)}</td>` : ""}
-    <td class="dim">${built ? esc(note) : "<i>placeholder page</i>"}</td>
+    <td>
+      <span class="screen-name">${esc(name)}</span>
+      ${built && note ? `<span class="screen-note">${esc(note)}</span>` : ""}
+      ${!built ? `<span class="screen-note"><i>placeholder — routes, does not work</i></span>` : ""}
+      ${who && who !== "—" ? `<span class="screen-role">${esc(who)}</span>` : ""}
+    </td>
+    <td><a class="url" href="${url}">${esc(url)}</a></td>
   </tr>`;
 }).join("");
 
@@ -279,6 +283,12 @@ const html = `<!doctype html>
   .org.flow col.c-note{ width:29% }
   .org.flow td.mono{ white-space:normal; word-break:break-all; line-height:1.45 }
   .org.flow td.role{ white-space:normal }
+  a.url{ font-family:'JetBrains Mono',monospace; font-size:8.1pt; color:#1c4fa8;
+    text-decoration:none; word-break:break-all; line-height:1.5 }
+  .screen-name{ display:block; font-weight:700; font-size:9.6pt }
+  .screen-note{ display:block; font-size:8.2pt; color:var(--muted); line-height:1.4; margin-top:.4mm }
+  .screen-role{ display:block; font-size:7.6pt; color:var(--lime-text); font-weight:700;
+    text-transform:uppercase; letter-spacing:.06em; margin-top:.6mm }
   .org.flow tr, .org.flow .org-head{ break-inside:avoid }
   .org.flow thead{ display:table-header-group }
   tr.off td{ opacity:.5 }
@@ -374,24 +384,28 @@ const html = `<!doctype html>
   <div class="kicker">Section 02</div>
   <h2>Every screen, and its link</h2>
   <div class="rule"></div>
-  <p class="intro">Prefix each path with <span class="mono">${LIVE}</span>. Every route in this
-    section was requested against the deployment while this report was being built and answered
-    <span class="mono">200</span> — including the placeholders, which render a &ldquo;planned&rdquo;
-    page rather than a 404. Sign in first at <span class="mono">/login</span>; the org routes redirect
-    there otherwise.</p>
+  <p class="intro">Every link below is complete and clickable — tap it in this PDF and it opens.
+    All of them were requested against the deployment while this report was being built and answered
+    <span class="mono">200</span>, including the placeholders, which render a &ldquo;planned&rdquo; page
+    rather than a 404.</p>
+  <p class="intro" style="margin-top:3mm">Sign in first:
+    <a class="url" href="${LIVE}/login">${LIVE}/login</a> — the staff and admin links redirect there
+    otherwise. The guest links need no login at all.</p>
 
   <div class="org flow" style="margin-top:6mm">
     <div class="org-head"><h3>Guest — no login at all</h3>
       <span class="org-meta">open on a phone</span></div>
     <table class="creds">
       <tbody>
+        <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
         ${Object.entries(live).map(([org, l]) => `<tr>
-          <td class="role">${esc(org)}</td>
-          <td class="mono">/t/${esc(l.token)}</td>
-          <td class="dim">Table ${esc(l.label)} — free, so it opens at the welcome screen</td>
+          <td><span class="screen-name">${esc(org)}</span>
+            <span class="screen-note">Table ${esc(l.label)} — free, so it opens at the welcome screen</span></td>
+          <td><a class="url" href="${LIVE}/t/${esc(l.token)}">${esc(LIVE)}/t/${esc(l.token)}</a></td>
         </tr>`).join("")}
-        <tr><td class="role">The walkthrough</td><td class="mono">/t/c7c91b3e8b</td>
-          <td class="dim">Mysore table 29 — the table every screenshot in this report was taken on</td></tr>
+        <tr><td><span class="screen-name">The walkthrough</span>
+          <span class="screen-note">Mysore table 29 — where every screenshot here was taken</span></td>
+          <td><a class="url" href="${LIVE}/t/c7c91b3e8b">${esc(LIVE)}/t/c7c91b3e8b</a></td></tr>
       </tbody>
     </table>
   </div>
@@ -401,8 +415,8 @@ const html = `<!doctype html>
     <div class="org-head"><h3>${esc(group)}</h3>
       <span class="org-meta">${rows.length} screen${rows.length === 1 ? "" : "s"}</span></div>
     <table class="creds">
-      <colgroup><col class="c-screen"><col class="c-path"><col class="c-role"><col class="c-note"></colgroup>
-      <thead><tr><th>Screen</th><th>Path</th><th>Roles</th><th>What it is</th></tr></thead>
+      <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
+      <thead><tr><th>Screen</th><th>Link — tap it</th></tr></thead>
       <tbody>${routeRows(rows, 4)}</tbody>
     </table>
   </div>`).join("")}
@@ -411,8 +425,8 @@ const html = `<!doctype html>
     <div class="org-head"><h3>Platform — master admin only</h3>
       <span class="org-meta">${ADMIN_ROUTES.length} screens</span></div>
     <table class="creds">
-      <colgroup><col class="c-screen"><col class="c-path"><col style="width:46%"></colgroup>
-      <thead><tr><th>Screen</th><th>Path</th><th>What it is</th></tr></thead>
+      <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
+      <thead><tr><th>Screen</th><th>Link — tap it</th></tr></thead>
       <tbody>${routeRows(ADMIN_ROUTES, 3)}</tbody>
     </table>
   </div>
