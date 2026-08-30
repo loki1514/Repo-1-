@@ -27,6 +27,7 @@ await p.goto("file://" + join(HERE, "report.html"), { waitUntil: "networkidle" }
 await p.emulateMedia({ media: "print" });
 await p.evaluate(() => document.fonts.ready);
 
+try {
 for (let i = 1; i <= TOTAL; i++) {
   const one = join(TMP, `p${i}.pdf`);
   await p.pdf({
@@ -39,6 +40,10 @@ for (let i = 1; i <= TOTAL; i++) {
   execFileSync("sips", ["-s", "format", "png", "-Z", "1400", one,
     "--out", join(OUT, `p${String(i).padStart(2, "0")}.png`)], { stdio: "ignore" });
 }
-await b.close();
-rmSync(TMP, { recursive: true, force: true });
-console.log(`  rendered ${TOTAL} true PDF pages`);
+  console.log(`  rendered ${TOTAL} true PDF pages`);
+} finally {
+  // Always runs — an out-of-range page range used to throw here and leave the
+  // whole temp directory behind for git to pick up.
+  await b.close();
+  rmSync(TMP, { recursive: true, force: true });
+}

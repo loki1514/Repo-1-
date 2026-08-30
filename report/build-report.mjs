@@ -18,6 +18,11 @@ const creds = JSON.parse(readFileSync("/tmp/creds.json", "utf8"));
 const qr = JSON.parse(readFileSync("/tmp/qr.json", "utf8"));
 const FONT_CSS = readFileSync(join(HERE, "fonts/inline.css"), "utf8");
 const perms = JSON.parse(readFileSync("/tmp/perms.json", "utf8"));
+const live = JSON.parse(readFileSync("/tmp/livelinks.json", "utf8"));
+const LIVE = "https://pos-ten-rosy.vercel.app";
+// What the deployment is actually running, so the report cannot claim a fix
+// is live when it is only committed.
+const DEPLOYED = "main @ 20c1b8d";
 
 const BUILT = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 const git = (cmd) => { try { return execSync(cmd, { cwd: HERE, encoding: "utf8" }).trim(); } catch { return "?"; } };
@@ -94,8 +99,10 @@ const orgBlock = (org) => {
         </tr>`).join("")}
       </tbody>
     </table>
-    ${link ? `<p class="qr-line">Guest QR · table ${esc(link.label)} → <span class="mono">/t/${esc(link.qr_token)}</span>${
-       org.startsWith("Mysore") ? ` &nbsp;·&nbsp; table 29 → <span class="mono">/t/c7c91b3e8b</span> — the table this report walks through` : ""
+    ${live[org] ? `<p class="qr-line"><b>Open this on a phone:</b>
+       <span class="mono">${esc(LIVE)}/t/${esc(live[org].token)}</span> — a free table (${esc(live[org].label)}), so it
+       starts at the welcome screen.${
+       org.startsWith("Mysore") ? ` The walkthrough in this report runs on table 29: <span class="mono">/t/c7c91b3e8b</span>.` : ""
      }</p>` : ""}
   </div>`;
 };
@@ -259,6 +266,13 @@ const html = `<!doctype html>
     <span class="mono">.example</span> domains, so none of them can receive mail — deliberate, so
     nothing here can be mistaken for a real account. The master admin is separate: its own
     password, and the only login that reaches the platform side.</p>
+
+  <div class="key" style="border-left-color:var(--lime-text)">
+    <b>Everything below is live right now at</b>
+    <code style="font-size:9.4pt">${LIVE}</code><br>
+    <span class="dim">Sign in at <span class="mono">/login</span>. Verified working on the deployment
+    the day this report was built — guest ordering, floor, kitchen, bill and the workflow canvas.</span>
+  </div>
 
   <div class="key">
     <b>Password for all 15 staff accounts:</b> <code>${PASSWORD}</code><br>
@@ -424,13 +438,26 @@ node scripts/seed-restaurants.mjs --remove</pre>
   <div class="kicker">Section 08</div>
   <h2>Deploying</h2>
   <div class="rule"></div>
-  <p class="intro">The code is on <span class="mono">main</span>. Nothing is live yet —
-    <span class="mono">vinipos.com</span> still serves a Hostinger parking page.</p>
+  <p class="intro">It is deployed and working at <span class="mono">${LIVE}</span> — guest ordering,
+    the floor, the kitchen, the bill and the workflow canvas all verified against that deployment.
+    Two things are still outstanding, and both are stated plainly below.</p>
 
-  <h3 style="margin-top:7mm">Environment variables Vercel needs</h3>
-  <p style="color:var(--ink-2); margin-top:2mm"><code>.env.local</code> never deploys. Miss the service
-    key and login itself succeeds — it is the first page after it that returns a 500. Miss the
-    passcode and "Apply to organization" refuses to run, by design.</p>
+  <div class="key" style="margin-top:5mm">
+    <b>1 · The domain is not pointed at it.</b> <span class="mono">vinipos.com</span> still serves a
+    Hostinger parking page, and no tenant subdomain resolves. Until that changes the product lives at the
+    <span class="mono">.vercel.app</span> address, which means the host-based tenant routing —
+    <span class="mono">saffron.vinipos.com</span> resolving to one restaurant — is written and tested but
+    not exercised in production.<br><br>
+    <b>2 · The deployment is three commits behind.</b> It carries <span class="mono">${DEPLOYED}</span>.
+    The floor fix (a table with an unsettled earlier order could open the wrong bill) and the overview
+    icon-contrast fix are committed but unpushed, so both are still present on the live site.
+  </div>
+
+  <h3 style="margin-top:7mm">Environment variables</h3>
+  <p style="color:var(--ink-2); margin-top:2mm">All nine are already set on the deployment — login and
+    every org route were confirmed returning 200. Listed for the next environment.
+    <code>.env.local</code> never deploys; miss the service key and login itself succeeds, but the first
+    page after it returns a 500. Miss the passcode and "Apply to organization" refuses to run, by design.</p>
 <pre>SUPABASE_URL                    NEXT_PUBLIC_SUPABASE_URL
 SUPABASE_ANON_KEY               NEXT_PUBLIC_SUPABASE_ANON_KEY
 SUPABASE_SERVICE_ROLE_KEY       PLATFORM_BASE_DOMAIN
@@ -452,6 +479,83 @@ ADMIN_BUILDER_PASSCODE          GROQ_API_KEY</pre>
     genuinely wired rather than decorative — which is the claim in this report that is easiest to
     doubt and quickest to test.
   </div>
+</section>
+
+
+<!-- AGAINST PETPOOJA -->
+<section class="page">
+  <div class="kicker">Section 09</div>
+  <h2>Against Petpooja</h2>
+  <div class="rule"></div>
+  <p class="intro">Read from Petpooja&rsquo;s own POSS Local merchant guide. Their answer to
+    &ldquo;where does my data live&rdquo; is a Windows PC in the back office, and the guide is candid
+    enough about its cost that it is worth reading closely before deciding whether to copy it.</p>
+
+  <div class="grid2" style="margin-top:6mm">
+    <div>
+      <h3>What POSS Local asks of the merchant</h3>
+      <ul class="plain" style="margin-top:3mm">
+        <li class="no">A dedicated Windows 11 machine — i5 to i7, 8&ndash;32&nbsp;GB, 1&nbsp;TB SSD</li>
+        <li class="no">A <b>static public IP bought from the ISP</b>, as a recurring cost</li>
+        <li class="no"><b>Port 7000 forwarded from the public internet</b> to that machine on the shop LAN</li>
+        <li class="no">Database credentials downloadable <b>once</b> — their guide states losing them
+          &ldquo;may result in complete data inaccessibility&rdquo;</li>
+        <li class="no">The POS <b>stops working after five days</b> if the Bridge Server disconnects</li>
+        <li class="no">Losing E-Bill, Tally/SAP, their own Loyalty, Inventory Consumption,
+          Reconciliation and Due Payment — all unsupported in local mode</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Where they are genuinely ahead</h3>
+      <ul class="plain" style="margin-top:3mm">
+        <li><b>Offline billing.</b> A restaurant on unreliable internet keeps trading. Vini cannot do
+          this today, and it is the honest reason POSS Local exists.</li>
+        <li><b>Breadth of integration</b> — Tally, EDC devices, Paytm QR, Kiosk, TDS, TRM, Reelo
+          loyalty. We have none of these.</li>
+        <li><b>Years of edge cases</b> in a product running real outlets.</li>
+      </ul>
+
+      <h3 style="margin-top:6mm">Where we are ahead</h3>
+      <ul class="plain" style="margin-top:3mm">
+        <li><b>Onboarding.</b> They need a PC, an ISP call, port forwarding and training-team sign-off.
+          We need a URL.</li>
+        <li>Guest ordering, the workflow canvas writing live configuration, and per-tenant theming have
+          no equivalent in what that guide describes.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="margin-top:7mm; font-size:8.4pt; color:var(--muted)">
+    Source: <span class="mono">petpooja_poss_local_guide.pdf</span>, 8 pages, merchant-facing. This is
+    analysis, not a claim about Petpooja&rsquo;s cloud product, which is a different and much broader offering.
+  </p>
+</section>
+
+<section class="page">
+  <div class="kicker">Section 09 · continued</div>
+  <h2>What to do about it</h2>
+  <div class="rule"></div>
+  <p class="intro">Three positions, in the order they matter. Only the first is urgent.</p>
+  <ol class="steps" style="margin-top:5mm">
+    <li><b>Build offline billing — not a Bridge Server.</b> A service worker and a local queue let the
+      POS keep taking orders and printing when the line drops, reconciling on reconnect. Same outcome,
+      no hardware, no static IP, no five-day cliff. This is the one piece of work that closes the real
+      gap, and it is the only item here that should be scheduled soon.</li>
+    <li><b>Do not copy the Bridge Server.</b> Their own FAQ documents its failure modes — unrecoverable
+      credentials, manual migration between machines, a hard stop on disconnection. Copying the design
+      imports the problems and the hardware bill with it.</li>
+    <li><b>Answer data residency without a PC.</b> The database is already in
+      <span class="mono">ap-south-1</span>. Per-tenant scheduled export into storage the merchant owns
+      meets the actual anxiety — control and portability — without asking a restaurant to expose a port
+      to the internet.</li>
+  </ol>
+
+  <div class="key" style="margin-top:7mm">
+    <b>One immediate wedge.</b> E-Bill is on Petpooja&rsquo;s own <em>unsupported</em> list for local mode.
+    Vini already renders an 80mm bill (figure&nbsp;20); delivering it over WhatsApp or email is a small
+    piece of work against something a competitor currently cannot do at all.
+  </div>
+
 </section>
 
 </body></html>`;

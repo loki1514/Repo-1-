@@ -35,3 +35,4 @@ report/pdfpages/
 report/fonts/
 report/*.pdf
 report/report.html
+report/.pages-tmp/
