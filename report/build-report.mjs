@@ -19,6 +19,7 @@ const qr = JSON.parse(readFileSync("/tmp/qr.json", "utf8"));
 const FONT_CSS = readFileSync(join(HERE, "fonts/inline.css"), "utf8");
 const perms = JSON.parse(readFileSync("/tmp/perms.json", "utf8"));
 const live = JSON.parse(readFileSync("/tmp/livelinks.json", "utf8"));
+const bill = JSON.parse(readFileSync("/tmp/billlink.json", "utf8"));
 const LIVE = "https://pos-ten-rosy.vercel.app";
 // What the deployment is actually running, so the report cannot claim a fix
 // is live when it is only committed.
@@ -131,6 +132,65 @@ function seesCell(org, role) {
   return body + note;
 }
 
+const ROUTES = {
+  "Service": [
+    ["Floor", "/org/tables", "manager · biller · captain", "built", "Live table view, guest call-outs, per-table state"],
+    ["Live operations", "/org/live", "manager · owner", "built", "Ball-by-ball board and the order timeline"],
+    ["Captain", "/org/captain", "captain · manager", "built", "Phone ordering at the table"],
+    ["Kitchen display", "/org/kds", "kitchen · manager", "built", "The pass — bump by line or by ticket"],
+    ["Kitchen (KOT)", "/org/kot", "kitchen · manager", "built", "The older list-style KOT board"],
+    ["POS billing", "/org/pos", "biller · manager", "built", "Counter billing for walk-ins"],
+    ["A bill", `/org/bills/${bill.orderId}`, "biller · manager", "built", `${bill.displayNo}, table ${bill.table} — settle, split, print`],
+    ["Thermal print", `/org/bills/${bill.orderId}/print`, "biller · manager", "built", "80mm receipt, auto-prints on open"],
+  ],
+  "Catalogue and channels": [
+    ["Menu items", "/org/menu-items", "manager · owner", "built", "Categories, prices, variants, availability"],
+    ["Table QR codes", "/org/qr", "manager · owner", "built", "One QR per table, regenerate, download"],
+    ["Printable QR sheet", "/org/qr/print", "manager · owner", "built", "A4 sheet of every table's code"],
+    ["Channels & item on/off", "/org/channels", "manager · owner", "built", "Swiggy / Zomato store status, per-item switch-offs"],
+  ],
+  "Organization": [
+    ["Overview", "/org", "every role", "built", "Where each role lands after signing in"],
+    ["Users & roles", "/org/users", "owner", "built", "The staff roster"],
+  ],
+  "Placeholders — they route, they do not work": [
+    ["Order history", "/org/orders", "—", "stub", ""],
+    ["Delivery", "/org/delivery", "—", "stub", ""],
+    ["Inventory", "/org/inventory", "—", "stub", ""],
+    ["Customers & CRM", "/org/customers", "—", "stub", ""],
+    ["Payments", "/org/payments", "—", "stub", ""],
+    ["Reports", "/org/reports", "—", "stub", ""],
+    ["Permissions", "/org/roles", "—", "stub", ""],
+    ["Locations", "/org/locations", "—", "stub", ""],
+    ["Settings", "/org/settings", "—", "stub", ""],
+  ],
+};
+
+const ADMIN_ROUTES = [
+  ["Master admin", "/admin", "built", "Every organization, with platform-wide counts"],
+  ["Organizations", "/admin/organizations", "built", "Create one; open a row for its modules, domains and theme"],
+  ["Workflows", "/admin/workflows", "built", "The canvas. Add ?org=<id> to scope it, then Apply to org"],
+  ["Permissions matrix", "/admin/roles", "built", "The same access as a grid"],
+  ["Module registry", "/admin/modules", "built", "What modules exist and how many orgs use each"],
+  ["Users", "/admin/users", "stub", ""],
+  ["Locations", "/admin/locations", "stub", ""],
+  ["Operations", "/admin/operations", "stub", ""],
+  ["Settings", "/admin/settings", "stub", ""],
+  ["Support", "/admin/support", "stub", ""],
+];
+
+const routeRows = (rows, cols) => rows.map(([name, path, ...rest]) => {
+  const built = rest[cols === 4 ? 1 : 0] !== "stub";
+  const who = cols === 4 ? rest[0] : null;
+  const note = rest[cols === 4 ? 2 : 1];
+  return `<tr class="${built ? "" : "off"}">
+    <td class="role">${esc(name)}</td>
+    <td class="mono">${esc(path)}</td>
+    ${who ? `<td class="dim">${esc(who)}</td>` : ""}
+    <td class="dim">${built ? esc(note) : "<i>placeholder page</i>"}</td>
+  </tr>`;
+}).join("");
+
 const g1 = gallery(byAct("guest"), 1);
 const g2 = gallery(byAct("staff"), g1.next);
 const gPayoff = gallery(byAct("payoff"), g2.next);
@@ -209,6 +269,20 @@ const html = `<!doctype html>
     color:var(--muted); padding:2.6mm 4mm 1.6mm; font-weight:800 }
   table.creds td{ padding:1.5mm 4mm; border-top:1px solid var(--hair); vertical-align:top }
   table.creds td.mono{ white-space:nowrap }
+  .org.flow{ break-inside:auto }
+  /* Without a fixed layout the 45-character bill UUID takes the whole measure
+     and squeezes the description column to one word per line. */
+  .org.flow table.creds{ table-layout:fixed }
+  .org.flow col.c-screen{ width:23% }
+  .org.flow col.c-path{ width:31% }
+  .org.flow col.c-role{ width:17% }
+  .org.flow col.c-note{ width:29% }
+  .org.flow td.mono{ white-space:normal; word-break:break-all; line-height:1.45 }
+  .org.flow td.role{ white-space:normal }
+  .org.flow tr, .org.flow .org-head{ break-inside:avoid }
+  .org.flow thead{ display:table-header-group }
+  tr.off td{ opacity:.5 }
+  tr.off td.role{ font-weight:600 }
   td.role{ font-weight:700; text-transform:capitalize; white-space:nowrap }
   td.dim{ color:var(--muted); font-size:8.4pt }
   .granted{ color:var(--ink); font-weight:700 }
@@ -294,9 +368,66 @@ const html = `<!doctype html>
   </div>
 </section>
 
-<!-- RUNNING IT -->
+
+<!-- EVERY SCREEN -->
 <section class="page">
   <div class="kicker">Section 02</div>
+  <h2>Every screen, and its link</h2>
+  <div class="rule"></div>
+  <p class="intro">Prefix each path with <span class="mono">${LIVE}</span>. Every route in this
+    section was requested against the deployment while this report was being built and answered
+    <span class="mono">200</span> — including the placeholders, which render a &ldquo;planned&rdquo;
+    page rather than a 404. Sign in first at <span class="mono">/login</span>; the org routes redirect
+    there otherwise.</p>
+
+  <div class="org flow" style="margin-top:6mm">
+    <div class="org-head"><h3>Guest — no login at all</h3>
+      <span class="org-meta">open on a phone</span></div>
+    <table class="creds">
+      <tbody>
+        ${Object.entries(live).map(([org, l]) => `<tr>
+          <td class="role">${esc(org)}</td>
+          <td class="mono">/t/${esc(l.token)}</td>
+          <td class="dim">Table ${esc(l.label)} — free, so it opens at the welcome screen</td>
+        </tr>`).join("")}
+        <tr><td class="role">The walkthrough</td><td class="mono">/t/c7c91b3e8b</td>
+          <td class="dim">Mysore table 29 — the table every screenshot in this report was taken on</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  ${Object.entries(ROUTES).map(([group, rows]) => `
+  <div class="org flow">
+    <div class="org-head"><h3>${esc(group)}</h3>
+      <span class="org-meta">${rows.length} screen${rows.length === 1 ? "" : "s"}</span></div>
+    <table class="creds">
+      <colgroup><col class="c-screen"><col class="c-path"><col class="c-role"><col class="c-note"></colgroup>
+      <thead><tr><th>Screen</th><th>Path</th><th>Roles</th><th>What it is</th></tr></thead>
+      <tbody>${routeRows(rows, 4)}</tbody>
+    </table>
+  </div>`).join("")}
+
+  <div class="org flow">
+    <div class="org-head"><h3>Platform — master admin only</h3>
+      <span class="org-meta">${ADMIN_ROUTES.length} screens</span></div>
+    <table class="creds">
+      <colgroup><col class="c-screen"><col class="c-path"><col style="width:46%"></colgroup>
+      <thead><tr><th>Screen</th><th>Path</th><th>What it is</th></tr></thead>
+      <tbody>${routeRows(ADMIN_ROUTES, 3)}</tbody>
+    </table>
+  </div>
+
+  <div class="key">
+    <b>The one link worth opening first.</b>
+    <span class="mono">/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83</span> — Rooftop, the
+    restaurant whose flow has never been applied. Press <b>Apply to org</b> and you get a real diff
+    rather than a screenshot of one.
+  </div>
+</section>
+
+<!-- RUNNING IT -->
+<section class="page">
+  <div class="kicker">Section 03</div>
   <h2>Running it</h2>
   <div class="rule"></div>
   <p class="intro">The database is already migrated and seeded — three restaurants sit mid-service,
@@ -334,7 +465,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
 <!-- ACT 1 -->
 <section class="page">
-  <div class="kicker">Section 03 · Act one</div>
+  <div class="kicker">Section 04 · Act one</div>
   <h2>The guest</h2>
   <div class="rule"></div>
   <p class="intro">No app, no sign-up, no account. The table is the credential: everyone scanning
@@ -345,7 +476,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
 <!-- ACT 2 -->
 <section class="page">
-  <div class="kicker">Section 04 · Act two</div>
+  <div class="kicker">Section 05 · Act two</div>
   <h2>The restaurant</h2>
   <div class="rule"></div>
   <p class="intro">The same order, seen from the floor, the pass and the till. Every total on these
@@ -359,7 +490,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
 <!-- ACT 3 -->
 <section class="page">
-  <div class="kicker">Section 05 · Act three</div>
+  <div class="kicker">Section 06 · Act three</div>
   <h2>The control plane</h2>
   <div class="rule"></div>
   <p class="intro">The workflow canvas is not documentation of how the product is configured —
@@ -370,7 +501,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
 <!-- ACT 4 -->
 <section class="page">
-  <div class="kicker">Section 06 · Act four</div>
+  <div class="kicker">Section 07 · Act four</div>
   <h2>The proof</h2>
   <div class="rule"></div>
   <p class="intro">Screens used to guard themselves with hardcoded role lists, which silently outranked
@@ -381,7 +512,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
 <!-- STATUS -->
 <section class="page">
-  <div class="kicker">Section 07</div>
+  <div class="kicker">Section 08</div>
   <h2>What is real, and what is not</h2>
   <div class="rule"></div>
   <p class="intro">A demo that hides its edges is worth less than one that names them.</p>
@@ -435,7 +566,7 @@ node scripts/seed-restaurants.mjs --remove</pre>
 
 <!-- DEPLOY -->
 <section class="page">
-  <div class="kicker">Section 08</div>
+  <div class="kicker">Section 09</div>
   <h2>Deploying</h2>
   <div class="rule"></div>
   <p class="intro">It is deployed and working at <span class="mono">${LIVE}</span> — guest ordering,
@@ -484,7 +615,7 @@ ADMIN_BUILDER_PASSCODE          GROQ_API_KEY</pre>
 
 <!-- AGAINST PETPOOJA -->
 <section class="page">
-  <div class="kicker">Section 09</div>
+  <div class="kicker">Section 10</div>
   <h2>Against Petpooja</h2>
   <div class="rule"></div>
   <p class="intro">Read from Petpooja&rsquo;s own POSS Local merchant guide. Their answer to
@@ -532,7 +663,7 @@ ADMIN_BUILDER_PASSCODE          GROQ_API_KEY</pre>
 </section>
 
 <section class="page">
-  <div class="kicker">Section 09 · continued</div>
+  <div class="kicker">Section 10 · continued</div>
   <h2>What to do about it</h2>
   <div class="rule"></div>
   <p class="intro">Three positions, in the order they matter. Only the first is urgent.</p>
