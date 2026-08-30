@@ -69,6 +69,22 @@ export default async function OrgLayout({
       )}
       <ChameleonShell theme={theme}>
         <Aurora />
+        {org.viewingAsPlatformAdmin && (
+          // Say it plainly. A platform admin seeing a restaurant's till without
+          // being told whose it is, is exactly how the wrong bill gets settled.
+          <div
+            className="relative z-20 flex flex-wrap items-center gap-2 px-4 py-2 text-[12.5px] font-bold"
+            style={{ background: "#14170f", color: "#f3f6ec" }}
+          >
+            <span style={{ color: "var(--lime)" }}>Vini platform admin</span>
+            <span className="opacity-80">
+              — viewing {org.name}. You are not a member of this restaurant; changes you make here are real.
+            </span>
+            <a href="/admin" className="press ml-auto underline opacity-80 hover:opacity-100">
+              Back to Master Admin
+            </a>
+          </div>
+        )}
         <OrgSidebar
           orgName={org.name}
           orgType={org.type}

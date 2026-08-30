@@ -76,6 +76,34 @@ async function restLookup(path: string): Promise<unknown[] | null> {
   return (await res.json()) as unknown[];
 }
 
+/** Paths that are the platform's own and can never be an organization slug. */
+const RESERVED = new Set([
+  "admin", "org", "login", "logout", "api", "invite", "t", "_next", "favicon.ico", "brand",
+]);
+
+/**
+ * Resolves a leading path segment to an organization.
+ *
+ * The host-based form (saffron.vinipos.com) only works once the domain points
+ * at us, which it does not yet — so the same tenant selection is offered in
+ * the path: /saffron-house/org/tables. Both funnel into the same x-org-id
+ * header, so everything downstream, including the tenant mismatch guard, is
+ * unchanged.
+ */
+async function resolveTenantSlug(slug: string): Promise<TenantRef | null> {
+  if (!slug || RESERVED.has(slug) || !/^[a-z0-9][a-z0-9-]{1,62}$/.test(slug)) return null;
+
+  const key = `slug:${slug}`;
+  const cached = cacheGet(key);
+  if (cached !== undefined) return cached;
+
+  const rows = await restLookup(`organizations?slug=eq.${encodeURIComponent(slug)}&select=id,slug`);
+  const row = rows?.[0] as { id: string; slug: string } | undefined;
+  const resolved = row ? { orgId: row.id, slug: row.slug } : null;
+  cacheSet(key, resolved);
+  return resolved;
+}
+
 async function resolveTenantHost(host: string): Promise<TenantRef | null> {
   const name = host.split(",")[0].trim().toLowerCase().replace(/:\d+$/, "");
   if (!name) return null;
@@ -151,10 +179,27 @@ export default async function proxy(request: NextRequest) {
   // host does not resolve to an organization (bare platform domain, unknown
   // host, localhost, preview deploys) nothing changes at all.
   const requestHeaders = new Headers(request.headers);
-  const tenant = await resolveTenantHost(request.headers.get("host") ?? "");
+
+  // Path-based tenant selection: /<slug>/org/... is rewritten to /org/... with
+  // the organization stamped on the request. This is what makes a link in a
+  // handover document unambiguous about which restaurant it opens, and it is
+  // also the only way a platform admin — who belongs to no organization — can
+  // reach an org screen at all.
+  const segments = pathname.split("/").filter(Boolean);
+  const slugTenant = segments.length > 0 ? await resolveTenantSlug(segments[0]) : null;
+
+  const tenant = slugTenant ?? (await resolveTenantHost(request.headers.get("host") ?? ""));
   if (tenant) {
     requestHeaders.set("x-org-id", tenant.orgId);
     requestHeaders.set("x-org-slug", tenant.slug);
+  }
+
+  if (slugTenant) {
+    // /saffron-house → /org, /saffron-house/org/kds → /org/kds
+    const rest = "/" + segments.slice(1).join("/");
+    const target = new URL(rest === "/" ? "/org" : rest, request.url);
+    target.search = search;
+    return NextResponse.rewrite(target, { request: { headers: requestHeaders } });
   }
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
