@@ -19,7 +19,7 @@ const qr = JSON.parse(readFileSync("/tmp/qr.json", "utf8"));
 const FONT_CSS = readFileSync(join(HERE, "fonts/inline.css"), "utf8");
 const perms = JSON.parse(readFileSync("/tmp/perms.json", "utf8"));
 const live = JSON.parse(readFileSync("/tmp/livelinks.json", "utf8"));
-const bill = JSON.parse(readFileSync("/tmp/billlink.json", "utf8"));
+const orgBills = JSON.parse(readFileSync("/tmp/orgbills.json", "utf8"));
 const LIVE = "https://pos-ten-rosy.vercel.app";
 // What the deployment is actually running, so the report cannot claim a fix
 // is live when it is only committed.
@@ -132,68 +132,87 @@ function seesCell(org, role) {
   return body + note;
 }
 
-const ROUTES = {
-  "Service": [
-    ["Floor", "/org/tables", "manager · biller · captain", "built", "Live table view, guest call-outs, per-table state"],
-    ["Live operations", "/org/live", "manager · owner", "built", "Ball-by-ball board and the order timeline"],
-    ["Captain", "/org/captain", "captain · manager", "built", "Phone ordering at the table"],
-    ["Kitchen display", "/org/kds", "kitchen · manager", "built", "The pass — bump by line or by ticket"],
-    ["Kitchen (KOT)", "/org/kot", "kitchen · manager", "built", "The older list-style KOT board"],
-    ["POS billing", "/org/pos", "biller · manager", "built", "Counter billing for walk-ins"],
-    ["A bill", `/org/bills/${bill.orderId}`, "biller · manager", "built", `${bill.displayNo}, table ${bill.table} — settle, split, print`],
-    ["Thermal print", `/org/bills/${bill.orderId}/print`, "biller · manager", "built", "80mm receipt, auto-prints on open"],
-  ],
-  "Catalogue and channels": [
-    ["Menu items", "/org/menu-items", "manager · owner", "built", "Categories, prices, variants, availability"],
-    ["Table QR codes", "/org/qr", "manager · owner", "built", "One QR per table, regenerate, download"],
-    ["Printable QR sheet", "/org/qr/print", "manager · owner", "built", "A4 sheet of every table's code"],
-    ["Channels & item on/off", "/org/channels", "manager · owner", "built", "Swiggy / Zomato store status, per-item switch-offs"],
-  ],
-  "Organization": [
-    ["Overview", "/org", "every role", "built", "Where each role lands after signing in"],
-    ["Users & roles", "/org/users", "owner", "built", "The staff roster"],
-  ],
-  "Placeholders — they route, they do not work": [
-    ["Order history", "/org/orders", "—", "stub", ""],
-    ["Delivery", "/org/delivery", "—", "stub", ""],
-    ["Inventory", "/org/inventory", "—", "stub", ""],
-    ["Customers & CRM", "/org/customers", "—", "stub", ""],
-    ["Payments", "/org/payments", "—", "stub", ""],
-    ["Reports", "/org/reports", "—", "stub", ""],
-    ["Permissions", "/org/roles", "—", "stub", ""],
-    ["Locations", "/org/locations", "—", "stub", ""],
-    ["Settings", "/org/settings", "—", "stub", ""],
-  ],
-};
 
-const ADMIN_ROUTES = [
-  ["Master admin", "/admin", "built", "Every organization, with platform-wide counts"],
-  ["Organizations", "/admin/organizations", "built", "Create one; open a row for its modules, domains and theme"],
-  ["Workflows", "/admin/workflows", "built", "The canvas. Add ?org=<id> to scope it, then Apply to org"],
-  ["Permissions matrix", "/admin/roles", "built", "The same access as a grid"],
-  ["Module registry", "/admin/modules", "built", "What modules exist and how many orgs use each"],
-  ["Users", "/admin/users", "stub", ""],
-  ["Locations", "/admin/locations", "stub", ""],
-  ["Operations", "/admin/operations", "stub", ""],
-  ["Settings", "/admin/settings", "stub", ""],
-  ["Support", "/admin/support", "stub", ""],
+const SCREENS = [
+  { name: "Overview",            path: "/org",            module: "Dashboard",              roles: ["biller", "captain", "manager", "org_admin"],
+    what: "Where a role lands after signing in. Today's sales, open tables, and a way through to whichever screen the shift needs." },
+  { name: "Floor",               path: "/org/tables",     module: "Orders",                 roles: ["manager", "biller", "captain", "org_admin"],
+    what: "The live table map, grouped by area. Occupied tables show minutes elapsed, running amount and the guest's PIN; a guest who taps Call Waiter appears at the top." },
+  { name: "Live operations",     path: "/org/live",       module: "Dashboard",              roles: ["manager", "org_admin"],
+    what: "The whole shift on one screen — sales, covers, what is cooking, what is on the pass, and a ball-by-ball timeline of every event." },
+  { name: "Captain",             path: "/org/captain",    module: "Orders",                 roles: ["captain", "manager", "org_admin"],
+    what: "Order-taking built for a phone held one-handed. Pick a table, search the menu, send straight to the kitchen." },
+  { name: "Kitchen display",     path: "/org/kds",        module: "Kitchen Display",        roles: ["kitchen", "manager", "org_admin"],
+    what: "The pass. Large type for reading across a kitchen, tickets that redden with age, and a bump per dish or per ticket." },
+  { name: "Kitchen (KOT)",       path: "/org/kot",        module: "Kitchen Display",        roles: ["kitchen", "manager", "org_admin"],
+    what: "The older list-style kitchen board, kept because some kitchens prefer a list to a card wall." },
+  { name: "POS billing",         path: "/org/pos",        module: "POS",                    roles: ["biller", "manager", "org_admin"],
+    what: "Counter billing for the walk-in who never scans anything. Same menu and the same bill arithmetic as the table flow." },
+  { name: "Menu items",          path: "/org/menu-items", module: "Menu",                   roles: ["manager", "org_admin"],
+    what: "Categories, prices, half/full variants, veg and non-veg marks. A price changed here is the price the guest's phone quotes next load." },
+  { name: "Table QR codes",      path: "/org/qr",         module: "Orders",                 roles: ["manager", "org_admin"],
+    what: "A real QR per table. Copy the link, download the SVG, or regenerate a code — which retires the sticker currently on that table." },
+  { name: "Printable QR sheet",  path: "/org/qr/print",   module: "Orders",                 roles: ["manager", "org_admin"],
+    what: "Every table's code on one A4 sheet, ready to cut and stick. Opens the print dialog by itself." },
+  { name: "Channels & item on/off", path: "/org/channels", module: "Settings",              roles: ["manager", "org_admin"],
+    what: "Swiggy and Zomato store status, and per-item availability. Switch a dish off for the QR channel and it disappears from the guest's menu." },
+  { name: "Users & roles",       path: "/org/users",      module: "Staff",                  roles: ["org_admin"],
+    what: "The staff roster for this restaurant, and which role each person holds." },
 ];
 
-const routeRows = (rows, cols) => rows.map(([name, path, ...rest]) => {
-  const built = rest[cols === 4 ? 1 : 0] !== "stub";
-  const who = cols === 4 ? rest[0] : null;
-  const note = rest[cols === 4 ? 2 : 1];
-  const url = `${LIVE}${path}`;
-  return `<tr class="${built ? "" : "off"}">
+const ROLE_LABEL = { org_admin: "owner", manager: "manager", biller: "biller", captain: "captain", kitchen: "kitchen" };
+
+/** The most junior role this org actually permits on a screen. */
+function loginFor(org, screen) {
+  const rows = perms.filter((p) => p.org === org);
+  for (const role of screen.roles) {
+    const row = rows.find((r) => r.role === role);
+    if (row?.sees?.split("|").some((m) => m.startsWith(screen.module))) return role;
+  }
+  return "org_admin";
+}
+
+const emailFor = (org, role) => {
+  const row = creds.find((c) => c.org === org && c.role === role);
+  return row?.email ?? "";
+};
+
+const orgScreens = (org) => {
+  const bill = orgBills[org];
+  const rows = SCREENS.map((sc) => {
+    const role = loginFor(org, sc);
+    return { ...sc, role, email: emailFor(org, role) };
+  });
+  if (bill) {
+    const role = loginFor(org, { module: "POS", roles: ["biller", "manager", "org_admin"] });
+    rows.push({
+      name: "A live bill",
+      path: `/org/bills/${bill.orderId}`,
+      what: `${bill.displayNo}${bill.table ? `, table ${bill.table}` : ""} — \u20b9${bill.total}. Take payment, split it, or print the 80mm receipt from here.`,
+      role, email: emailFor(org, role),
+    });
+    rows.push({
+      name: "That bill, as a receipt",
+      path: `/org/bills/${bill.orderId}/print`,
+      what: "The thermal print view. Black on white only, because a thermal printer has no colours.",
+      role, email: emailFor(org, role),
+    });
+  }
+  return rows;
+};
+
+const screenCard = (org, r) => `
+  <tr>
     <td>
-      <span class="screen-name">${esc(name)}</span>
-      ${built && note ? `<span class="screen-note">${esc(note)}</span>` : ""}
-      ${!built ? `<span class="screen-note"><i>placeholder — routes, does not work</i></span>` : ""}
-      ${who && who !== "—" ? `<span class="screen-role">${esc(who)}</span>` : ""}
+      <span class="screen-name">${esc(r.name)}</span>
+      <span class="screen-note">${esc(r.what)}</span>
     </td>
-    <td><a class="url" href="${url}">${esc(url)}</a></td>
+    <td>
+      <a class="url" href="${LIVE}${r.path}">${esc(LIVE)}${esc(r.path)}</a>
+      <span class="cred">Sign in as <b>${esc(ROLE_LABEL[r.role] ?? r.role)}</b> &nbsp;
+        <span class="mono">${esc(r.email)}</span> &nbsp;·&nbsp; <span class="mono">${PASSWORD}</span></span>
+    </td>
   </tr>`;
-}).join("");
 
 const g1 = gallery(byAct("guest"), 1);
 const g2 = gallery(byAct("staff"), g1.next);
@@ -287,6 +306,10 @@ const html = `<!doctype html>
     text-decoration:none; word-break:break-all; line-height:1.5 }
   .screen-name{ display:block; font-weight:700; font-size:9.6pt }
   .screen-note{ display:block; font-size:8.2pt; color:var(--muted); line-height:1.4; margin-top:.4mm }
+  .cred{ display:block; margin-top:1.2mm; font-size:7.9pt; color:var(--ink-2);
+    background:var(--paper-2); border-left:2px solid var(--lime-text);
+    padding:1.2mm 2.4mm; border-radius:0 3px 3px 0; line-height:1.5 }
+  .cred .mono{ font-size:7.7pt }
   .screen-role{ display:block; font-size:7.6pt; color:var(--lime-text); font-weight:700;
     text-transform:uppercase; letter-spacing:.06em; margin-top:.6mm }
   .org.flow tr, .org.flow .org-head{ break-inside:avoid }
@@ -382,60 +405,148 @@ const html = `<!doctype html>
 <!-- EVERY SCREEN -->
 <section class="page">
   <div class="kicker">Section 02</div>
-  <h2>Every screen, and its link</h2>
+  <h2>How to open every screen</h2>
   <div class="rule"></div>
-  <p class="intro">Every link below is complete and clickable — tap it in this PDF and it opens.
-    All of them were requested against the deployment while this report was being built and answered
-    <span class="mono">200</span>, including the placeholders, which render a &ldquo;planned&rdquo; page
-    rather than a 404.</p>
-  <p class="intro" style="margin-top:3mm">Sign in first:
-    <a class="url" href="${LIVE}/login">${LIVE}/login</a> — the staff and admin links redirect there
-    otherwise. The guest links need no login at all.</p>
+  <p class="intro">This section assumes you have never seen the product. Every screen below has its own
+    complete link and, underneath it, the exact email and password to sign in with. Tap the link, sign in
+    with the credential printed beside it, and you are on that screen.</p>
 
-  <div class="org flow" style="margin-top:6mm">
-    <div class="org-head"><h3>Guest — no login at all</h3>
-      <span class="org-meta">open on a phone</span></div>
+  <div class="key" style="margin-top:5mm">
+    <b>Read this once, and the rest of the section makes sense.</b><br><br>
+    All three restaurants share the same web address. There is no
+    <span class="mono">/mysore-dining-hall/…</span> in the URL — <b>the login is what chooses the
+    restaurant.</b> Signing in as <span class="mono">owner@mysoredininghall.example</span> and opening
+    <span class="mono">/org/tables</span> shows you Mysore&rsquo;s floor; the same link signed in as the
+    Rooftop owner shows Rooftop&rsquo;s. That is the whole multi-tenancy model: one deployment, one set of
+    URLs, and the data separated by who you are.<br><br>
+    So: <b>to switch restaurants you must sign out first</b> — top right of any screen — and sign back in
+    with the other restaurant&rsquo;s credential. Opening a &ldquo;Rooftop&rdquo; link while still signed in
+    as Mysore will simply show you Mysore again.<br><br>
+    The one exception is the guest links. Those carry the table in the address itself, need no login, and
+    work no matter who else is signed in on that browser.
+  </div>
+
+  <p class="intro" style="margin-top:5mm">Two more things worth knowing before you start:</p>
+  <ul class="plain" style="margin-top:3mm">
+    <li>The credential printed under each screen is the <b>most junior role that this restaurant actually
+      permits there</b>. A kitchen login opens the kitchen display but is refused the till — that refusal
+      is the permission system working, not a bug.</li>
+    <li>Guest links are best opened <b>on a phone</b>, or in a desktop browser narrowed to phone width.
+      They are built for one hand in a busy room.</li>
+  </ul>
+</section>
+
+${Object.keys(live).sort((a, b) => (a.startsWith('Mysore') ? -1 : b.startsWith('Mysore') ? 1 : a.localeCompare(b))).map((org) => `
+<section class="page">
+  <div class="kicker">Section 02 · ${esc(org)}</div>
+  <h2>${esc(org)}</h2>
+  <div class="rule"></div>
+
+  <div class="org flow" style="margin-top:5mm">
+    <div class="org-head">
+      <span class="swatch" style="background:${esc(creds.find((c) => c.org === org)?.accent ?? "#b4ee2a")}"></span>
+      <h3>Start here — the guest, with no login at all</h3>
+    </div>
     <table class="creds">
+      <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
       <tbody>
-        <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
-        ${Object.entries(live).map(([org, l]) => `<tr>
-          <td><span class="screen-name">${esc(org)}</span>
-            <span class="screen-note">Table ${esc(l.label)} — free, so it opens at the welcome screen</span></td>
-          <td><a class="url" href="${LIVE}/t/${esc(l.token)}">${esc(LIVE)}/t/${esc(l.token)}</a></td>
-        </tr>`).join("")}
-        <tr><td><span class="screen-name">The walkthrough</span>
-          <span class="screen-note">Mysore table 29 — where every screenshot here was taken</span></td>
-          <td><a class="url" href="${LIVE}/t/c7c91b3e8b">${esc(LIVE)}/t/c7c91b3e8b</a></td></tr>
+        <tr>
+          <td>
+            <span class="screen-name">Scan the table</span>
+            <span class="screen-note">Table ${esc(live[org].label)}, which has nobody sitting at it, so you
+              land on the welcome screen. Choose how many are eating, order something, then look at
+              My Orders and Pay Bill.</span>
+          </td>
+          <td>
+            <a class="url" href="${LIVE}/t/${esc(live[org].token)}">${esc(LIVE)}/t/${esc(live[org].token)}</a>
+            <span class="cred">No sign-in. Open it on a phone.</span>
+          </td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  ${Object.entries(ROUTES).map(([group, rows]) => `
   <div class="org flow">
-    <div class="org-head"><h3>${esc(group)}</h3>
-      <span class="org-meta">${rows.length} screen${rows.length === 1 ? "" : "s"}</span></div>
+    <div class="org-head"><h3>The staff screens</h3>
+      <span class="org-meta">password is <span class="mono">${PASSWORD}</span> for all of them</span></div>
     <table class="creds">
       <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
-      <thead><tr><th>Screen</th><th>Link — tap it</th></tr></thead>
-      <tbody>${routeRows(rows, 4)}</tbody>
+      <tbody>${orgScreens(org).map((r) => screenCard(org, r)).join("")}</tbody>
     </table>
-  </div>`).join("")}
+  </div>
+</section>`).join("")}
 
-  <div class="org flow">
-    <div class="org-head"><h3>Platform — master admin only</h3>
-      <span class="org-meta">${ADMIN_ROUTES.length} screens</span></div>
+<section class="page">
+  <div class="kicker">Section 02 · Platform</div>
+  <h2>The Vini side</h2>
+  <div class="rule"></div>
+  <p class="intro">These screens sit above the restaurants — they are how a new organization is created and
+    configured. One login opens all of them, and it is not a restaurant account.</p>
+
+  <div class="key" style="margin-top:4mm">
+    <b>Sign in as</b> <span class="mono">vinipos.mas-admin@vinipos.com</span> &nbsp;·&nbsp;
+    <span class="mono">operator1234%</span><br>
+    <span class="dim">The page is titled Master Admin; the account header reads Super Admin. Same login.</span>
+  </div>
+
+  <div class="org flow" style="margin-top:5mm">
+    <div class="org-head"><h3>Platform screens</h3><span class="org-meta">5 built, 5 placeholders</span></div>
     <table class="creds">
       <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
-      <thead><tr><th>Screen</th><th>Link — tap it</th></tr></thead>
-      <tbody>${routeRows(ADMIN_ROUTES, 3)}</tbody>
+      <tbody>
+        ${[
+          ["Master admin", "/admin", "Every organization on the platform, with counts across all tenants."],
+          ["Organizations", "/admin/organizations", "Create a restaurant here. Opening a row gives you its modules, domains, theme and its admin credential."],
+          ["Workflow builder", "/admin/workflows", "The canvas. Drag module blocks, name the roles on each, and apply it to a restaurant."],
+          ["Permissions matrix", "/admin/roles", "The same access as a grid, for when a change is one tick rather than a redrawn journey."],
+          ["Module registry", "/admin/modules", "What modules exist, and how many organizations have each switched on."],
+        ].map(([n, path, what]) => `<tr>
+          <td><span class="screen-name">${esc(n)}</span><span class="screen-note">${esc(what)}</span></td>
+          <td><a class="url" href="${LIVE}${path}">${esc(LIVE)}${esc(path)}</a>
+            <span class="cred">Sign in as <b>master admin</b> &nbsp;<span class="mono">vinipos.mas-admin@vinipos.com</span>
+              &nbsp;·&nbsp; <span class="mono">operator1234%</span></span></td>
+        </tr>`).join("")}
+      </tbody>
     </table>
   </div>
 
   <div class="key">
-    <b>The one link worth opening first.</b>
-    <span class="mono">/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83</span> — Rooftop, the
-    restaurant whose flow has never been applied. Press <b>Apply to org</b> and you get a real diff
-    rather than a screenshot of one.
+    <b>The single most worthwhile link in this report.</b><br>
+    <a class="url" href="${LIVE}/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83">${LIVE}/admin/workflows?org=c1324de3-6b66-494a-a043-14c2aa5eec83</a><br><br>
+    That is the workflow canvas scoped to <b>Rooftop All Day Kitchen</b> — the one restaurant whose flow has
+    never been applied. Press <b>Apply to org</b>, and instead of a screenshot you get a live diff of exactly
+    which role is about to gain which module. The passcode is <span class="mono">${PASSCODE}</span>.
+    Afterwards, sign out and sign back in as
+    <span class="mono">captain@rooftopallday.example</span> — the sidebar will have changed.
+  </div>
+</section>
+
+<section class="page">
+  <div class="kicker">Section 02 · continued</div>
+  <h2>Screens that are not built yet</h2>
+  <div class="rule"></div>
+  <p class="intro">These are in the navigation and they open, but each renders a &ldquo;planned&rdquo; page
+    rather than doing anything. They are listed so that opening one does not read as a broken link.</p>
+
+  <div class="org flow" style="margin-top:5mm">
+    <div class="org-head"><h3>Placeholders</h3><span class="org-meta">14 screens</span></div>
+    <table class="creds">
+      <colgroup><col style="width:44%"><col style="width:56%"></colgroup>
+      <tbody>
+        ${[
+          ["Order history", "/org/orders"], ["Delivery", "/org/delivery"],
+          ["Inventory", "/org/inventory"], ["Customers & CRM", "/org/customers"],
+          ["Payments", "/org/payments"], ["Reports", "/org/reports"],
+          ["Permissions", "/org/roles"], ["Locations", "/org/locations"],
+          ["Settings", "/org/settings"], ["Platform users", "/admin/users"],
+          ["Platform locations", "/admin/locations"], ["Platform operations", "/admin/operations"],
+          ["Platform settings", "/admin/settings"], ["Support", "/admin/support"],
+        ].map(([n, path]) => `<tr class="off">
+          <td><span class="screen-name">${esc(n)}</span></td>
+          <td><a class="url" href="${LIVE}${path}">${esc(LIVE)}${esc(path)}</a></td>
+        </tr>`).join("")}
+      </tbody>
+    </table>
   </div>
 </section>
 
