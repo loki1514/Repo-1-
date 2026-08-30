@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Activity,
   BarChart3,
   Building2,
   ChefHat,
@@ -15,14 +16,15 @@ import {
   Menu,
   Monitor,
   Package,
+  Plug,
   QrCode,
   Receipt,
   Settings,
   ShieldCheck,
   Smartphone,
+  Table2,
   Truck,
   Users,
-  Utensils,
   UtensilsCrossed,
   X,
 } from "lucide-react";
@@ -64,16 +66,25 @@ const SECTIONS: { heading: string | null; items: Item[] }[] = [
     ],
   },
   {
-    heading: "Operations",
+    heading: "Service",
     items: [
-      { href: "/org/orders", label: "Live Orders", icon: ClipboardList, moduleKey: "orders" },
-      { href: "/org/captain", label: "Captain Order", icon: Smartphone, moduleKey: "orders" },
-      { href: "/org/kot", label: "Kitchen (KOT)", icon: ChefHat, moduleKey: "kds_kot" },
-      { href: "/org/kds", label: "Kitchen Display", icon: Monitor, moduleKey: "kds_kot" },
+      // Ordered the way a shift actually runs: the floor first, because that
+      // is the screen a manager leaves open all night.
+      { href: "/org/tables", label: "Floor", icon: Table2, ready: true, moduleKey: "orders" },
+      { href: "/org/live", label: "Live Operations", icon: Activity, ready: true, moduleKey: "dashboard" },
+      { href: "/org/captain", label: "Captain", icon: Smartphone, ready: true, moduleKey: "orders" },
+      { href: "/org/kds", label: "Kitchen Display", icon: Monitor, ready: true, moduleKey: "kds_kot" },
+      { href: "/org/kot", label: "Kitchen (KOT)", icon: ChefHat, ready: true, moduleKey: "kds_kot" },
+      { href: "/org/pos", label: "POS Billing", icon: Receipt, ready: true, moduleKey: "pos" },
+      { href: "/org/orders", label: "Order History", icon: ClipboardList, moduleKey: "orders" },
+    ],
+  },
+  {
+    heading: "Catalog & Channels",
+    items: [
       { href: "/org/menu-items", label: "Menu Items", icon: UtensilsCrossed, ready: true, moduleKey: "menu" },
-      { href: "/org/pos", label: "POS Billing", icon: Receipt, moduleKey: "pos" },
-      { href: "/org/tables", label: "Dining Areas", icon: Utensils, moduleKey: "orders" },
-      { href: "/org/qr", label: "QR Ordering", icon: QrCode, moduleKey: "orders" },
+      { href: "/org/qr", label: "Table QR Codes", icon: QrCode, ready: true, moduleKey: "orders" },
+      { href: "/org/channels", label: "Channels & Item On/Off", icon: Plug, ready: true, moduleKey: "settings" },
       { href: "/org/delivery", label: "Delivery", icon: Truck, moduleKey: "orders" },
     ],
   },

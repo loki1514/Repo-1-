@@ -1,6 +1,7 @@
 "use server";
 
 import { getMyOrg } from "@/lib/org";
+import { requireModule } from "@/lib/module-guard";
 import { supabaseServer } from "@/lib/supabase-server";
 import {
   setKotStatus,
@@ -12,16 +13,9 @@ import {
   type PaymentMethod,
 } from "@/lib/pos";
 
-const ALLOWED_ROLES = new Set(["kitchen", "org_admin"]);
-
-async function requireKitchenAccess() {
-  const org = await getMyOrg();
-  if (!org) throw new Error("No organization.");
-  if (!ALLOWED_ROLES.has(org.myRole)) {
-    throw new Error("KOT board is restricted to the kitchen role.");
-  }
-  return org;
-}
+// Deferred to the control plane rather than a constant, so the workflow
+// builder and the permission matrix actually govern this board.
+const requireKitchenAccess = () => requireModule("kds_kot", "The KOT board");
 
 export type BoardOrder = Order & { table_label: string | null };
 export type BoardItem = OrderItem & { is_available: boolean | null };

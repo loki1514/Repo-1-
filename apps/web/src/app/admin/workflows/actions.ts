@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
 import { saveWorkflow, setWorkflowActive } from "@/lib/tenant";
+import { applyPlan, planFromWorkflow, type ApplyPlan } from "@/lib/workflow-apply";
 import {
   parseDefinition,
   slugIsValid,
@@ -111,4 +112,109 @@ export async function setWorkflowActiveAction(
     const message = err instanceof Error ? err.message : "Something went wrong.";
     return { ok: false, error: message.replace(/^setWorkflowActive:\s*/, "") };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Applying a flow to an organization
+//
+// Saving a workflow has always written JSON and changed nothing else. These
+// two actions close that loop: preview turns the drawn flow into a diff
+// against the org's live configuration, and apply writes it — behind the same
+// builder passcode that guards the permission matrix, because it moves the
+// same permissions.
+// ---------------------------------------------------------------------------
+
+export type PreviewState =
+  | { ok: true; plan: ApplyPlan; error: null }
+  | { ok: false; plan: null; error: string };
+
+export async function previewApplyAction(
+  organizationId: string,
+  definition: unknown,
+  prune: boolean,
+): Promise<PreviewState> {
+  try {
+    await requirePlatformAdmin();
+    if (!organizationId || organizationId === "platform") {
+      return {
+        ok: false,
+        plan: null,
+        error:
+          "Pick an organization first — a platform template has no single configuration to apply to.",
+      };
+    }
+    const plan = await planFromWorkflow(organizationId, definition, { prune });
+    return { ok: true, plan, error: null };
+  } catch (err) {
+    return {
+      ok: false,
+      plan: null,
+      error: err instanceof Error ? err.message : "Could not build the plan.",
+    };
+  }
+}
+
+export type ApplyState = { ok: boolean; error: string | null; applied: string | null };
+
+export async function applyWorkflowAction(
+  organizationId: string,
+  definition: unknown,
+  prune: boolean,
+  passcode: string,
+): Promise<ApplyState> {
+  try {
+    await requirePlatformAdmin();
+
+    if (!process.env.ADMIN_BUILDER_PASSCODE) {
+      return {
+        ok: false,
+        applied: null,
+        error:
+          "Builder passcode is not configured on this deployment. Set ADMIN_BUILDER_PASSCODE before configuration can be applied.",
+      };
+    }
+    if (!builderPasscodeMatches(passcode)) {
+      // A deliberate pause: this is the second lock, and a fast "no" invites
+      // guessing at it.
+      await new Promise((r) => setTimeout(r, 400));
+      return { ok: false, applied: null, error: "That passcode is not correct." };
+    }
+
+    // The plan is rebuilt here rather than accepted from the client. The
+    // browser sends the drawing; what that drawing means for permissions is
+    // decided on the server, every time.
+    const plan = await planFromWorkflow(organizationId, definition, { prune });
+    const written = await applyPlan(plan);
+
+    revalidatePath("/admin/workflows");
+    revalidatePath("/admin/organizations");
+    revalidatePath("/org");
+
+    const parts: string[] = [];
+    if (written.modules > 0) parts.push(`${written.modules} module${written.modules === 1 ? "" : "s"}`);
+    if (written.roles > 0) parts.push(`${written.roles} permission${written.roles === 1 ? "" : "s"}`);
+
+    return {
+      ok: true,
+      error: null,
+      applied: parts.length > 0 ? parts.join(" and ") : "nothing — the org already matched this flow",
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      applied: null,
+      error: err instanceof Error ? err.message : "Could not apply the flow.",
+    };
+  }
+}
+
+/** Same second lock as the permission matrix — see app/admin/roles/actions.ts. */
+function builderPasscodeMatches(input: string): boolean {
+  const expected = process.env.ADMIN_BUILDER_PASSCODE ?? "";
+  if (!expected || input.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) {
+    diff |= input.charCodeAt(i) ^ expected.charCodeAt(i);
+  }
+  return diff === 0;
 }

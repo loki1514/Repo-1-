@@ -17,6 +17,7 @@ import { haptic } from "@/lib/haptics";
 import { fromTenantDefinition } from "./definition";
 import { EdgeList, FlowPreview } from "./FlowPreview";
 import { WorkflowEditor, type EditorTarget } from "./WorkflowEditor";
+import { ApplyToOrg } from "./ApplyToOrg";
 import type { ModuleInput, RoleAccess } from "./canvas/nodeKinds";
 
 const MODULE_BADGE: Record<string, { bg: string; fg: string }> = {
@@ -298,6 +299,14 @@ export function WorkflowsManager({
                         <History size={13} strokeWidth={2.6} />
                         Versions
                       </Button>
+                      {organizationId && (
+                        <ApplyToOrg
+                          organizationId={organizationId}
+                          scopeLabel={scopeLabel}
+                          definition={definition}
+                          workflowName={latest.name}
+                        />
+                      )}
                       <Button
                         variant="glass"
                         size="sm"

@@ -4,12 +4,14 @@ import { CreateOrgSheet } from "@/components/admin/CreateOrgSheet";
 import { OrgTable } from "@/components/admin/OrgTable";
 import { StatTile } from "@/components/admin/StatTile";
 import { listOrganizations } from "@/lib/organizations";
+import { platformStats } from "@/lib/platform-stats";
+import { inrShort } from "@/lib/bill";
 
 export const metadata: Metadata = { title: "Master Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const organizations = await listOrganizations();
+  const [organizations, stats] = await Promise.all([listOrganizations(), platformStats()]);
   const active = organizations.filter((o) => o.status === "active").length;
 
   return (
@@ -24,7 +26,7 @@ export default async function AdminDashboard() {
         {organizations.length > 0 && <CreateOrgSheet />}
       </div>
 
-      {/* KPIs — locations/users/orders stay at 0 until those modules exist */}
+      {/* Real counts across every tenant — see lib/platform-stats.ts */}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile
           label="Organizations"
@@ -32,9 +34,24 @@ export default async function AdminDashboard() {
           icon={Building2}
           hint={`${active} active`}
         />
-        <StatTile label="Locations" value="0" icon={MapPin} hint="not built yet" />
-        <StatTile label="Users" value="0" icon={Users} hint="not built yet" />
-        <StatTile label="Orders today" value="0" icon={ReceiptText} hint="not built yet" />
+        <StatTile
+          label="Tables"
+          value={String(stats.tables)}
+          icon={MapPin}
+          hint="Across all outlets"
+        />
+        <StatTile
+          label="Staff accounts"
+          value={String(stats.members)}
+          icon={Users}
+          hint="Active members"
+        />
+        <StatTile
+          label="Orders today"
+          value={String(stats.ordersToday)}
+          icon={ReceiptText}
+          hint={`${inrShort(stats.salesToday)} settled`}
+        />
       </div>
 
       {organizations.length === 0 ? (
