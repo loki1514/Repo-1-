@@ -32,7 +32,13 @@ export function MenuBrowser({
   pin: string;
 }) {
   const [tab, setTab] = useState<Tab>("for_you");
-  const [openCats, setOpenCats] = useState<Set<string>>(new Set());
+  // Tracks which sections are CLOSED, not which are open.
+  //
+  // The other way round needs an empty set to mean "all open", and then the
+  // first tap on any header — which adds that section to the set — silently
+  // collapses every other section as a side effect. Storing the closed ones
+  // makes the default state genuinely empty and every toggle independent.
+  const [closedCats, setClosedCats] = useState<Set<string>>(new Set());
   const [jump, setJump] = useState(false);
   const [variantFor, setVariantFor] = useState<GuestMenuItem | null>(null);
 
@@ -64,12 +70,14 @@ export function MenuBrowser({
 
   // Collapsed-by-default only once there are enough sections to make scrolling
   // a chore; a three-section menu should just be open.
-  const collapsible = grouped.length > 3;
-  const isOpen = (id: string) => !collapsible || openCats.has(id) || openCats.size === 0;
+  // One section is nothing to collapse; the chevrons only earn their place
+  // once the menu is long enough to scroll.
+  const collapsible = grouped.length > 1;
+  const isOpen = (id: string) => !collapsible || !closedCats.has(id);
 
   function toggle(id: string) {
     haptic("light");
-    setOpenCats((prev) => {
+    setClosedCats((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
@@ -215,7 +223,11 @@ export function MenuBrowser({
                 key={cat.id}
                 type="button"
                 onClick={() => {
-                  setOpenCats(new Set([cat.id]));
+                  setClosedCats((prev) => {
+                    const next = new Set(prev);
+                    next.delete(cat.id);
+                    return next;
+                  });
                   setJump(false);
                   haptic("light");
                   document.getElementById(`cat-${cat.id}`)?.scrollIntoView({ behavior: "smooth" });
