@@ -3,8 +3,21 @@
 import { Bell, LogOut, Search } from "lucide-react";
 import { haptic } from "@/lib/haptics";
 
-export function TopBar({ email }: { email: string }) {
-  const initials = email.slice(0, 2).toUpperCase();
+export function TopBar({
+  email,
+  name,
+  role,
+}: {
+  email: string;
+  name?: string;
+  role?: string;
+}) {
+  const initials = (name ?? email)
+    .split(/[\s@.]+/)
+    .slice(0, 2)
+    .map((s) => s[0] ?? "")
+    .join("")
+    .toUpperCase();
 
   return (
     <header className="sticky top-0 z-30 -mx-4 mb-7 bg-[linear-gradient(180deg,var(--canvas)_0%,var(--canvas)_78%,transparent_100%)] px-4 pb-5 pt-4 md:-mx-6 md:px-6">
@@ -51,9 +64,11 @@ export function TopBar({ email }: { email: string }) {
               {initials}
             </span>
             <span className="hidden leading-tight lg:block">
-              <span className="block text-[13px] font-bold">Super Admin</span>
-              <span className="block max-w-[170px] truncate text-[11.5px] text-muted">
-                {email}
+              <span className="block text-[13px] font-bold">
+                {name ?? "Super Admin"}
+              </span>
+              <span className="block max-w-[190px] truncate text-[11.5px] text-muted">
+                {role ? `${role} · ${email}` : email}
               </span>
             </span>
           </div>

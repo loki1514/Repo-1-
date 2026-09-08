@@ -6,7 +6,13 @@ import { listOrganizations } from "@/lib/organizations";
 export const metadata: Metadata = { title: "Organizations" };
 export const dynamic = "force-dynamic";
 
-export default async function OrganizationsPage() {
+export default async function OrganizationsPage({
+  searchParams,
+}: {
+  /** ?fromLead=<id>&name=<business name> — a won deal linking straight into creation. */
+  searchParams: Promise<{ fromLead?: string; name?: string }>;
+}) {
+  const { fromLead, name: fromName } = await searchParams;
   const organizations = await listOrganizations();
 
   const active = organizations.filter((o) => o.status === "active").length;
@@ -23,7 +29,11 @@ export default async function OrganizationsPage() {
             from here.
           </p>
         </div>
-        <CreateOrgSheet />
+        <CreateOrgSheet
+          initialName={fromName}
+          sourceLeadId={fromLead}
+          autoOpen={Boolean(fromLead)}
+        />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">

@@ -6,6 +6,8 @@ import {
   Blocks,
   Building2,
   ChefHat,
+  Handshake,
+  ListChecks,
   LayoutDashboard,
   LifeBuoy,
   MapPin,
@@ -17,15 +19,19 @@ import {
 import { cn } from "@/lib/cn";
 import { haptic } from "@/lib/haptics";
 
+// `section` is what the role gate in lib/platform-admin.ts checks. An entry
+// with no section is master-admin-only infrastructure.
 const NAV = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/organizations", label: "Organizations", icon: Building2 },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/locations", label: "Locations", icon: MapPin },
-  { href: "/admin/operations", label: "Operations", icon: ChefHat },
-  { href: "/admin/roles", label: "Roles", icon: ShieldCheck },
-  { href: "/admin/modules", label: "Modules", icon: Blocks },
-  { href: "/admin/workflows", label: "Workflows", icon: Workflow },
+  { href: "/admin", label: "Dashboard", icon: LayoutDashboard, section: "*" },
+  { href: "/admin/organizations", label: "Organizations", icon: Building2, section: "organizations" },
+  { href: "/admin/growth", label: "Growth", icon: Handshake, section: "growth" },
+  { href: "/admin/work", label: "Work", icon: ListChecks, section: "work" },
+  { href: "/admin/users", label: "Users", icon: Users, section: "admin-only" },
+  { href: "/admin/locations", label: "Locations", icon: MapPin, section: "admin-only" },
+  { href: "/admin/operations", label: "Operations", icon: ChefHat, section: "admin-only" },
+  { href: "/admin/roles", label: "Roles", icon: ShieldCheck, section: "admin-only" },
+  { href: "/admin/modules", label: "Modules", icon: Blocks, section: "admin-only" },
+  { href: "/admin/workflows", label: "Workflows", icon: Workflow, section: "admin-only" },
 ];
 
 const FOOT = [
@@ -66,10 +72,16 @@ function Item({
   );
 }
 
-export function Rail() {
+export function Rail({ sections }: { sections?: string[] }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+
+  // Undefined = show everything (master admin). Otherwise only what the role
+  // is allowed to open, so the sidebar never offers a screen that refuses.
+  const nav = !sections
+    ? NAV
+    : NAV.filter((n) => n.section === "*" || sections.includes(n.section));
 
   return (
     <>
@@ -91,7 +103,7 @@ export function Rail() {
         </Link>
 
         <nav className="flex flex-col items-center gap-1.5">
-          {NAV.map((n) => (
+          {nav.map((n) => (
             <Item key={n.href} {...n} active={isActive(n.href)} />
           ))}
         </nav>
@@ -106,7 +118,7 @@ export function Rail() {
 
       {/* Mobile bottom bar */}
       <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-[20px] px-2 py-2 glass-dark md:hidden">
-        {NAV.slice(0, 5).map((n) => (
+        {nav.slice(0, 5).map((n) => (
           <Item key={n.href} {...n} active={isActive(n.href)} />
         ))}
       </nav>

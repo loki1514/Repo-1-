@@ -10,12 +10,20 @@ import {
 } from "@/lib/organizations";
 import { createInvite } from "@/lib/invites";
 import { generatePassword } from "@/lib/password";
+import { convertLeadToOrganization } from "@/lib/os/orchestrator";
 
 export type CreateOrgState = {
   ok: boolean;
   error: string | null;
   /** Present only right after a successful create — shown once, never stored client-side. */
-  created: { orgName: string; adminEmail: string; adminPassword: string } | null;
+  created: {
+    orgName: string;
+    adminEmail: string;
+    adminPassword: string;
+    organizationId: string | null;
+    /** What the OS did on its own after the org existed. Empty for a manual create. */
+    cascade: string[];
+  } | null;
 };
 
 export async function createOrganizationAction(
@@ -32,6 +40,7 @@ export async function createOrganizationAction(
     const contactEmail = String(formData.get("contactEmail") ?? "");
     const contactPhone = String(formData.get("contactPhone") ?? "");
     const adminEmail = String(formData.get("adminEmail") ?? "").trim();
+    const sourceLeadId = String(formData.get("sourceLeadId") ?? "").trim() || null;
 
     if (!name) return { ok: false, error: "Organization name is required.", created: null };
     if (type !== "franchise" && type !== "investor") {
@@ -43,6 +52,42 @@ export async function createOrganizationAction(
 
     const adminPassword = generatePassword();
 
+    // A conversion is not a create. When this org comes from a won deal the
+    // orchestrator owns it: requirements, handoff, first work item, signals
+    // and timeline all follow from one press of this button.
+    if (sourceLeadId) {
+      const admin = await requirePlatformAdmin();
+      const result = await convertLeadToOrganization({
+        leadId: sourceLeadId,
+        name,
+        type,
+        adminEmail,
+        adminPassword,
+        contactEmail,
+        contactPhone,
+        legalName,
+        gstin,
+        actor: admin.id,
+      });
+
+      revalidatePath("/admin/organizations");
+      revalidatePath("/admin");
+      revalidatePath("/admin/growth");
+      revalidatePath(`/admin/organizations/${result.organizationId}`);
+
+      return {
+        ok: true,
+        error: null,
+        created: {
+          orgName: result.organizationName,
+          adminEmail: result.adminEmail,
+          adminPassword: result.adminPassword,
+          organizationId: result.organizationId,
+          cascade: result.cascade,
+        },
+      };
+    }
+
     const { organization, admin } = await createOrganization({
       name,
       type,
@@ -52,6 +97,7 @@ export async function createOrganizationAction(
       contactPhone,
       adminEmail,
       adminPassword,
+      sourceLeadId,
     });
 
     revalidatePath("/admin/organizations");
@@ -64,6 +110,8 @@ export async function createOrganizationAction(
         orgName: organization.name,
         adminEmail: admin.email,
         adminPassword: admin.password,
+        organizationId: organization.id,
+        cascade: [],
       },
     };
   } catch (err) {

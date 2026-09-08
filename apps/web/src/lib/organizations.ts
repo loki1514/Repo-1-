@@ -16,6 +16,7 @@ export type Organization = {
   gstin: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  source_lead_id: string | null;
   created_at: string;
 };
 
@@ -23,7 +24,7 @@ export async function listOrganizations(): Promise<Organization[]> {
   const { data, error } = await supabaseAdmin
     .from("organizations")
     .select(
-      "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, created_at",
+      "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, source_lead_id, created_at",
     )
     .order("created_at", { ascending: false });
 
@@ -31,11 +32,32 @@ export async function listOrganizations(): Promise<Organization[]> {
   return data ?? [];
 }
 
+/**
+ * Which leads have already become an organization, and which one — the org
+ * row is the proof, so there is no mirrored "converted" flag on leads to
+ * keep in sync.
+ */
+export async function listConvertedOrgsByLead(): Promise<
+  Map<string, { id: string; name: string; slug: string }>
+> {
+  const { data, error } = await supabaseAdmin
+    .from("organizations")
+    .select("id, name, slug, source_lead_id")
+    .not("source_lead_id", "is", null);
+  if (error) throw new Error(`listConvertedOrgsByLead: ${error.message}`);
+
+  const byLead = new Map<string, { id: string; name: string; slug: string }>();
+  for (const r of data ?? []) {
+    byLead.set(r.source_lead_id as string, { id: r.id, name: r.name, slug: r.slug });
+  }
+  return byLead;
+}
+
 export async function getOrganization(id: string): Promise<Organization | null> {
   const { data, error } = await supabaseAdmin
     .from("organizations")
     .select(
-      "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, created_at, theme",
+      "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, source_lead_id, onboarding_stage, created_at, theme",
     )
     .eq("id", id)
     .maybeSingle();
@@ -98,6 +120,8 @@ export type CreateOrganizationInput = {
   /** Mandatory — every organization gets one admin login at creation time. */
   adminEmail: string;
   adminPassword: string;
+  /** Set when this org is built from a won deal — touchpoint 3 -> 4. */
+  sourceLeadId?: string | null;
 };
 
 export type CreatedOrganization = {
@@ -125,9 +149,10 @@ async function insertOrganizationRow(
         gstin: input.gstin?.trim().toUpperCase() || null,
         contact_email: input.contactEmail?.trim() || null,
         contact_phone: input.contactPhone?.trim() || null,
+        source_lead_id: input.sourceLeadId || null,
       })
       .select(
-        "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, created_at",
+        "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, source_lead_id, created_at",
       )
       .single();
 
@@ -137,6 +162,11 @@ async function insertOrganizationRow(
     if (error.code === "23505" && error.message.includes("slug")) {
       slug = `${baseSlug}-${attempt + 2}`;
       continue;
+    }
+
+    // Unique violation on source_lead_id — this lead already became an organization.
+    if (error.code === "23505" && error.message.includes("source_lead_id")) {
+      throw new Error("createOrganization: This lead has already been converted to an organization.");
     }
 
     throw new Error(`createOrganization: ${error.message}`);

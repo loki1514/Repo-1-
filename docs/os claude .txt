@@ -1,0 +1,1239 @@
+﻿Proviyaa · founding script · v1
+The Proviyaa Script
+Every role in the ecosystem, with a named person in it. The story of how work moves between them — from the first sales call to a rider handing over a bag of groceries. Written as a script so that every technical decision that follows can be traced back to a scene, a person, and the thing they were trying to do.
+This is an abstract, not a specification. It names no tables, no APIs, no screens by their code. It names people, what they see when they sit down in the morning, and who they hand their work to. The technical requirements are derived from this document in phases — deliberately not here.
+How to read it. Section 2 is the cast list — skim it once so the names mean something. Section 3 is the spine: one merchant, nine scenes, from lead to expansion. Section 4 is the same world seen sideways — a working day in every department. Section 5 follows one customer across all three verticals in a single day. Sections 6 and 7 are the connective tissue: how feedback moves between the two platforms, and every handoff in one table.
+1 · The world
+Five things, and the lines between them
+Proviyaa is the platform. It is one product, deployed once, that a merchant configures into the shape of their business. A restaurant, a grocery store and a salon are not three apps — they are three verticals of the same platform, differing in which modules are switched on and which roles exist. Vini POS, already built, is the restaurant vertical.
+One Latur is the customer-facing marketplace. A resident of Latur opens it to order food, buy groceries, or book a haircut. It sits in front of every merchant on Proviyaa and presents them as one city's worth of commerce. The customer has one identity across all of it — the same person who ordered biryani on Tuesday is the one buying atta on Wednesday, and the CRM knows that.
+OneLatur is the delivery and fulfilment network. Riders, dispatch, zones, fleet. It is deliberately not inside the restaurant or store application — a merchant marks an order ready, and OneLatur takes it from there. The rider has their own app; dispatch has its own console.
+The Growth Panel is where merchants are found, sold to, and paid for. Sales, partners, resellers, affiliates and the commissions that flow to them all live here, separate from the operational platform.
+The Proviyaa Console is the platform team's own surface — where organizations are created, configured, supported, secured and measured. It is the master-admin side of what already exists.
+The two platforms that matter for feedback
+Throughout this script, "two platforms" means a specific pair:
+Platform one
+The Merchant App
+What a restaurant owner, a cashier, a chef, a store manager or a stylist uses every day. Every screen here is where a merchant-side person can raise a problem, rate a change, or ask for something — without leaving the work they were doing.
+Platform two
+The Proviyaa Console
+What the platform team uses. Every problem raised on platform one arrives here, tagged with the organization, the screen, the role and the person. Ops triages, product decides, engineering ships, customer success closes the loop back to platform one.
+Section 6 describes the loop between them in detail. The principle is simple: a merchant should never have to leave their own app to be heard, and the platform team should never have to guess where a complaint came from.
+The three anchor merchants
+To keep the script concrete, three real-shaped businesses in Latur are used throughout. They are invented, but every role in them is one from the taxonomy.
+* Annapurna Hospitality — a family restaurant group with three outlets: Annapurna Main (Ausa Road), Annapurna Express (a counter near the railway station), and a third, franchised outlet at Ganj Golai. This is the protagonist merchant of the spine.
+* Latur Fresh Mart — a two-branch grocery with a small warehouse, selling on One Latur with delivery through OneLatur.
+* Glow Studio — a salon with two branches, running bookings, stylists and walk-ins.
+2 · The cast
+Eighty-seven people. Every role in the taxonomy has one.
+Names are the point. "The Platform Finance Admin reconciles settlements" is a sentence nobody remembers; "Rohan closes the settlement run at four" is. Each table gives the role, the person, what they are for, and the dashboard they open first in the morning.
+Platform & master users
+They control the whole ecosystem. Their home is the Proviyaa Console.
+Role
+	Person
+	What they are for
+	Home
+	Master Admin
+	Vikram Deshpande
+	Complete control. Creates organizations, holds the final say on anything that changes what a merchant can do. Owns the workflow builder passcode.
+	Console / Organizations
+	Platform Admin
+	Aarti Kulkarni
+	Configures a won merchant into a working organization: modules, roles, workflow, branding. The bridge between a sale and a go-live.
+	Console / Organizations
+	Platform Operations Manager
+	Sameer Jadhav
+	Watches every live organization at once. First to see a kitchen screen frozen at 8pm on a Saturday.
+	Console / Operations
+	Product Manager
+	Neha Bhosale
+	Decides what the platform does next. Turns a hundred merchant complaints into three things engineering will build.
+	Console / Feedback
+	Platform Finance Admin
+	Rohan Mehta
+	Subscription billing, marketplace settlements, delivery payouts, commission disbursement. Every rupee that moves between parties passes his screen.
+	Console / Finance
+	Platform Support Admin
+	Priya Nair
+	Runs customer success: demos, onboarding, the first thirty days, and the standing relationship after.
+	Console / Support
+	Security / Compliance Admin
+	Arjun Iyer
+	Audit trails, access reviews, data residency, GST and FSSAI compliance across every tenant.
+	Console / Audit
+	Data / Analytics Admin
+	Kavya Reddy
+	Platform-wide numbers: adoption, churn, order volumes, which modules earn their keep.
+	Console / Analytics
+	Design Admin
+	Ishaan Pawar
+	Website and app appearance — the platform's own, and each merchant's branding on top of it.
+	Console / Appearance
+	Growth & sales users
+They find and grow merchants. Screens only — they live in the Growth Panel and the Commission Panel, never inside a merchant's operations.
+Role
+	Person
+	What they are for
+	Home
+	Growth Admin
+	Manasi Joshi
+	Owns the funnel end to end: territories, targets, plan pricing, partner programme.
+	Growth / Overview
+	Sales Manager
+	Rahul Shinde
+	Runs the sales team. Reviews every deal before it is quoted; unblocks the ones that stall.
+	Growth / Pipeline
+	Sales Executive
+	Tanvi Patil
+	On the road in Latur. First contact, pitch, demo on the road, and the signature.
+	Growth / My leads
+	Business Development Executive
+	Omkar Gaikwad
+	Scopes the deal: how many outlets, which modules, what is custom. Writes the brief Aarti builds from.
+	Growth / Scoping
+	Service Provider Sales User
+	Sneha Kale
+	Sells to the service vertical — salons, clinics, tutors, repair shops.
+	Growth / My leads
+	Partner Manager
+	Aditya Rao
+	Recruits and supports resellers, affiliates and referral partners.
+	Growth / Partners
+	Reseller
+	Sunil Wagh (Wagh Digital, Latur)
+	A local IT shop that sells Proviyaa under its own name and supports its merchants first-line.
+	Partner portal
+	Affiliate
+	Pooja Mane
+	A food blogger with a link. Paid per signup that converts.
+	Partner portal
+	Referral Partner
+	Dr. Farhan Shaikh
+	A dentist whose patients own restaurants. Refers by name, paid on conversion.
+	Partner portal
+	Commission Manager
+	Nikhil Bhat
+	Defines commission rules and approves what each partner is owed.
+	Commission / Rules
+	Commission Finance User
+	Divya Menon
+	Pays it out. Reconciles partner statements against settlements.
+	Commission / Payouts
+	Organization users — Annapurna Hospitality
+The merchant's head office. Screens only, across the whole organization. Instantiated here inside the protagonist merchant.
+Role
+	Person
+	What they are for
+	Home
+	Organization Owner
+	Sunita Deshmukh
+	Founded Annapurna in 2009. Signs the contract, sees the money, decides on the fourth outlet.
+	Merchant / Overview
+	Organization Admin
+	Prashant Deshmukh
+	Sunita's son. Runs the platform side of the business: who has access, what is switched on, which workflow is live.
+	Merchant / Settings
+	Business Manager
+	Kiran Sawant
+	Day-to-day head of the group. Targets, pricing, the weekly review.
+	Merchant / Live operations
+	Branch / Location Manager
+	Amol Chavan
+	Runs Annapurna Main. Also the Restaurant Manager in the vertical list — one person, two hats.
+	Merchant / Floor
+	Operations Manager
+	Vaishali More
+	Across all three outlets: staffing, supplies, the things that go wrong between kitchens.
+	Merchant / Live operations
+	Finance Manager
+	Suresh Bhagwat
+	Cash, settlements from One Latur, aggregator payouts, GST.
+	Merchant / Finance
+	Accountant
+	Mahesh Kadam
+	Books the day. Reconciles the till against the bank.
+	Merchant / Finance
+	HR / Staff Manager
+	Rupali Jagtap
+	Rosters, attendance, advances, who has left and who has joined.
+	Merchant / Staff
+	Marketing Manager
+	Akash Salunkhe
+	Offers on One Latur, loyalty, the Sunday thali campaign.
+	Merchant / Marketing
+	Inventory Manager
+	Ganesh Thorat
+	Stock across three kitchens; what to buy, what is being wasted.
+	Merchant / Inventory
+	Procurement Manager
+	Shivaji Pawar
+	Suppliers, purchase orders, receipts.
+	Merchant / Purchasing
+	Customer Support User
+	Komal Waghmare
+	Answers the One Latur customer: where is my order, the dal was cold.
+	Merchant / Customers
+	Analyst / Reporting User
+	Tejas Kulkarni
+	Builds the weekly pack Kiran reads. Read-only across everything.
+	Merchant / Reports
+	Staff User
+	Ravi Shelke
+	The general case: a person with a login and one or two screens.
+	Assigned screens
+	Viewer
+	CA Anand Joshi
+	External chartered accountant. Sees finance, changes nothing.
+	Merchant / Finance (read)
+	Restaurant — vertical roles
+The operational floor of Annapurna. These are the roles the existing Vini POS build already serves — floor, KOT, kitchen, tables, billing.
+Role
+	Person
+	What they are for
+	Home
+	Restaurant Owner / Investor
+	Sunita Deshmukh
+	Same person as the Organization Owner — in a single-brand group, they are one.
+	Merchant / Overview
+	Franchise Owner type
+	Deepak Bansode
+	Owns the Ganj Golai outlet under the Annapurna name. An organization type, not a separate app: sees his outlet fully, the group's numbers not at all.
+	Merchant / Overview (scoped)
+	Restaurant Manager
+	Amol Chavan
+	Annapurna Main, all day. The floor is his screen.
+	Merchant / Floor
+	Outlet Manager
+	Sagar Nikam
+	Annapurna Express — the counter outlet. Smaller team, faster turns.
+	Merchant / Floor
+	Cashier
+	Pallavi Shirsat
+	The till at Main. Settles bills, takes walk-ins, prints.
+	Merchant / POS billing
+	Zone Manager
+	Balaji Kamble
+	A section of the floor at Main — the family hall — and the captains in it.
+	Merchant / Floor (zone)
+	Waiter / Captain
+	Santosh Ghuge
+	Takes orders at the table on his phone, runs food, answers Call Waiter.
+	Merchant / Captain
+	Kitchen Manager
+	Chef Ramesh Lokhande
+	Head of kitchen at Main. Owns the pass and the prep list.
+	Merchant / Kitchen display
+	Chef
+	Vishal Patil
+	Tandoor station. Bumps his own tickets.
+	Merchant / Kitchen display (station)
+	Kitchen Staff
+	Nitin Jadhav
+	Prep, plating, the dish-out. Sees the kitchen screen, touches nothing else.
+	Merchant / Kitchen display (read)
+	Billing Staff
+	Pallavi Shirsat
+	At Main, the cashier is the billing staff. At Express, Sagar bills himself.
+	Merchant / POS billing
+	Inventory Staff
+	Sachin Bhosale
+	Counts the cold room every morning for Ganesh.
+	Merchant / Inventory (count)
+	Purchase Staff
+	Yogesh Mane
+	Goes to the mandi at five. Receives what Shivaji ordered.
+	Merchant / Purchasing (receive)
+	Delivery Coordinator
+	Meena Solanke
+	The handover point between the kitchen and OneLatur's rider. Packs, labels, marks ready.
+	Merchant / Delivery desk
+	Reception / Reservation Staff
+[a]	
+Swati Bhosale
+	Front desk at Main. Bookings, the waitlist on Sunday, seating.
+	Merchant / Reservations
+	Store — vertical roles (Latur Fresh Mart)
+Role
+	Person
+	What they are for
+	Home
+	Store Owner
+	Mohan Agarwal
+	Owns both branches. Watches margin, not tickets.
+	Merchant / Overview
+	Store Manager
+	Rekha Agarwal
+	Runs the main branch on Shivaji Chowk. Pricing, promotions, the One Latur listing.
+	Merchant / Store
+	Branch Manager
+	Vijay Pawar
+	The second branch, Barshi Road.
+	Merchant / Store (branch)
+	Cashier
+	Rani Sonawane
+	Scans, bills, takes UPI.
+	Merchant / POS billing
+	Sales Staff
+	Arun Kale
+	On the shop floor; picks One Latur orders between customers.
+	Merchant / Pick list
+	Inventory Manager
+	Deepa Shinde
+	Stock levels, expiry, reorder points across both branches.
+	Merchant / Inventory
+	Warehouse Manager
+	Bhaskar Rathod
+	The godown behind the main branch. Receives, stores, transfers.
+	Merchant / Warehouse
+	Purchase Staff
+	Nilesh Jadhav
+	Raises orders to distributors from Deepa's reorder list.
+	Merchant / Purchasing
+	Stock Staff
+	Ajay Wadekar
+	Shelves it. Counts it. Flags the short-dated.
+	Merchant / Inventory (count)
+	Delivery Coordinator
+	Sonali Gore
+	Bags the One Latur orders and hands to the OneLatur rider.
+	Merchant / Delivery desk
+	SECURITY /
+VENDOR ENTY GATE
+	
+
+	NOTES VENDOR LIST/ AND DELIVERY DETAILS
+
+
+	
+
+	Service — vertical roles (Glow Studio)
+Role
+	Person
+	What they are for
+	Home
+	Service Business Owner
+	Farida Pathan
+	Founded Glow. Two branches, eleven stylists.
+	Merchant / Overview
+	Service Manager
+	Zeenat Sheikh
+	Runs service quality and the stylist roster.
+	Merchant / Bookings
+	Branch Manager
+	Rukhsana Qureshi
+	The second branch, MIDC.
+	Merchant / Bookings (branch)
+	Receptionist
+	Nasreen Inamdar
+	The front desk: check-in, walk-ins, the phone.
+	Merchant / Front desk
+	Service Provider
+	Anjali Deshpande
+	Senior stylist. Has her own calendar and her own regulars.
+	Merchant / My calendar
+	Staff / Technician
+	Rahim Sayyed
+	Facials and treatments. Room-based, not chair-based.
+	Merchant / My calendar
+	Booking Manager
+	Sameena Khan
+	Owns the calendar across both branches; balances load between stylists.
+	Merchant / Bookings
+	Finance Staff
+	Imran Mulla
+	Bills, packages, memberships, the daily close.
+	Merchant / Finance
+	Customer Support
+	Ayesha Momin
+	Reschedules, complaints, the "was it Anjali or Rahim" question.
+	Merchant / Customers
+	Customer & marketplace users — One Latur
+One identity across every vertical. The CRM keeps a single profile per person no matter where they spend.
+Role
+	Person
+	What they are for
+	Home
+	Customer
+	Meghana Kulkarni
+	The through-line customer of Section 5. Lives in Latur, orders food, buys groceries, books a salon — all on One Latur.
+	One Latur app
+	Guest Customer
+	Guest #4821
+	Walked into Annapurna, scanned the table QR, never signed in. Ordered, paid, left. Known only as a table session.
+	Table QR (no login)
+	Registered Customer
+	Meghana Kulkarni
+	Meghana, once she has an account. Order history, addresses, saved cards.
+	One Latur app
+	Premium / Membership Customer
+	Sandeep Bhandari
+	Pays for One Latur Plus: free delivery, early offers, priority support.
+	One Latur app (Plus)
+	Business Customer
+	Latur Engineering College canteen
+	Buys bulk from Fresh Mart weekly on account, not per order.
+	One Latur Business
+	Corporate Customer
+	Zydus Latur plant — HR
+	Staff meals from Annapurna on a monthly contract. One invoice, hundreds of meals.
+	One Latur Business
+	Delivery & fulfilment — OneLatur
+The network that moves things. Riders use the Rider App; everyone else uses the Dispatch Console. None of these people work inside a merchant's app.
+Role
+	Person
+	What they are for
+	Home
+	Delivery Admin
+	Prakash Rathod
+	Owns OneLatur end to end: zones, pricing, the rider programme.
+	Dispatch / Overview
+	Dispatch Manager
+	Sarika Lande
+	The live board. Assigns, reassigns, watches the late ones.
+	Dispatch / Live board
+	Delivery Operations Manager
+	Vinod Ghodke
+	Shifts, capacity, the weekend surge plan.
+	Dispatch / Planning
+	Zone Manager
+	Dnyaneshwar Mule
+	South Latur. Knows every lane the map doesn't.
+	Dispatch / Zone
+	Fleet Manager
+	Sandip Bhalerao
+	Bikes, boxes, insurance, the rider who hasn't returned the bag.
+	Dispatch / Fleet
+	Rider / Delivery Partner
+	Akshay Kadam
+	On a bike from ten till ten. Sees one job at a time.
+	Rider App
+	Pickup Agent
+	Ramdas Suryawanshi
+	Collects returns and bulk pickups in a van, not a bike.
+	Rider App (pickup)
+	Fulfilment Staff
+	Sheetal Kamble
+	The OneLatur hub: consolidates multi-merchant orders before a rider leaves.
+	Dispatch / Hub
+	Delivery Support Agent
+[b]	
+Priyanka Gore
+	"Where is my rider." Talks to the customer and the rider at once.
+	Dispatch / Support
+	3 · The spine
+One merchant, nine scenes, from a dentist's waiting room to a fourth outlet
+This is the flow the whole ecosystem exists to run. Annapurna Hospitality goes from a name Tanvi hasn't heard of to a three-outlet organization with a franchisee, live on One Latur, delivered by OneLatur. Every scene ends with a handoff: who passes what to whom, and what appears on the receiving person's dashboard the moment it happens.
+The rule every scene obeys. Nothing is handed over by phone call or WhatsApp that the platform could have handed over itself. When Tanvi closes a deal, Aarti does not get a message saying "new client" — she gets the scoped brief, the signed plan and the payment confirmation on her queue, with Tanvi's name on it. The people still talk. But the work moves through the system, so that six months later anyone can see where it went.
+Scenes 1–4 · The sale
+Scene 1DiscoveryGrowth PanelDay 0
+A referral lands in Tanvi's queue
+Dr. Farhan Shaikh has been cleaning Sunita Deshmukh's teeth for eleven years. She mentions the restaurant is losing orders on Sundays because the kitchen can't read the handwritten KOTs. Farhan opens the partner portal on his phone between patients and refers Annapurna Hospitality by name, with Sunita's number and one line: "three outlets, kitchen chaos, owner is the decision-maker."
+The referral is attributed to Farhan the instant it is created. Nikhil's commission rules already know what a converted restaurant referral is worth, so a provisional commission appears on Farhan's statement — greyed, not payable, waiting on a payment that hasn't happened.
+Manasi's territory rules put Latur restaurants with Tanvi. The lead appears at the top of Tanvi's list, marked referral, with Farhan's note attached and a suggested first action: call within 24 hours, referrals convert at three times the rate of cold leads.
+Dr. Farhan Shaikh
+Referral Partner
+referral · attributed
+Tanvi Patil
+Sales Executive
+Scene 2Qualification & pitchGrowth Panel · Merchant demoDays 1–6
+The pitch is a working restaurant, not a slide deck
+Tanvi calls Sunita, gets a meeting for Thursday, and marks the lead meeting set. Rahul sees it in the morning pipeline review, notes it is a referral with three outlets, and flags it as one to accompany — a multi-outlet restaurant is a group deal, and group deals get the sales manager in the room.
+At Annapurna Main on Thursday, Tanvi does not open a presentation. She opens a demo restaurant on her tablet — a fully configured one, mid-service, with tables occupied and food on the pass — and hands Sunita a phone showing the guest's view of the same tables. Sunita scans a QR, orders a filter coffee, and watches it appear on the tablet's kitchen screen. That is the pitch. The demo restaurant is a standing asset the Growth team keeps seeded for exactly this.
+Sunita's questions are about her business, not the software: can the Ganj Golai outlet see only its own numbers (yes — franchise is an organization type), can my son switch things off without calling you (yes — that is the organization admin), what happens when the internet goes (Tanvi writes this down honestly as a gap and it goes on the scoping brief).
+Tanvi marks the lead qualified and requests scoping. Omkar picks it up.
+Tanvi Patil
+Sales Executive
+qualified lead · demo notes
+Omkar Gaikwad
+Business Development
+Scene 3Scoping & commercialsGrowth Panel · Commission PanelDays 7–12
+Omkar writes the brief Aarti will build from
+Omkar visits all three outlets over two days. The scoping brief he produces is the single most important document in the deal, because it is what the platform team will configure against without ever having met Sunita. It records, per outlet:
+* Annapurna Main — 24 tables in three zones, a family hall that needs its own zone manager, a tandoor as a separate kitchen station, reservations on Sundays, delivery through One Latur. Modules: orders, POS, kitchen display, menu, inventory, staff, reservations, delivery.
+* Annapurna Express — 8 tables, counter service, no reservations, no captain. One person bills and manages. Modules: orders, POS, kitchen display, menu.
+* Annapurna Ganj Golai — franchised to Deepak Bansode. Full restaurant modules, but the franchise organization type, so Deepak sees his outlet and nothing of the group's finance.
+He also records the customs: Sunita wants the Sunday thali as a fixed-price bundle on One Latur; she wants the kitchen screen in Marathi; she wants the Zydus corporate contract billed monthly, not per meal. None of these are software features yet — they are requirements the platform team will meet with configuration where they can and flag to Neha where they can't.
+Rahul reviews the brief and the plan Tanvi has selected. He approves the quote. Nikhil, in the Commission Panel, sees the deal value firm up and Farhan's provisional commission recalculates against it. Sunita receives the quote with a link to the demo restaurant she saw on Thursday, now branded in Annapurna's red.
+Ishaan applied the brand in twenty minutes from Sunita's menu card — the Design Admin does this for every quote above a threshold, because a merchant who sees their own name on the product signs faster.
+Omkar Gaikwad
+Business Development
+scoping brief · quote · plan
+Sunita Deshmukh
+Organization Owner
+Scene 4PaymentGrowth Panel · Console Finance · Commission PanelDay 14
+Sunita pays, and four things happen at once
+Sunita pays the annual plan on the fourteenth. In the Growth Panel the deal moves to won with Tanvi's name on it and Farhan's referral still attached. That single state change fans out:
+* Rohan sees the payment on the platform finance ledger, matched to the deal, and the subscription starts its clock.
+* Nikhil sees Farhan's commission move from provisional to approved. Divya sees it join next Friday's payout run. Farhan's statement updates before he has finished his afternoon appointments.
+* Aarti gets a new item at the top of her build queue: Annapurna Hospitality — 3 outlets — brief attached — paid. She has never spoken to Sunita and does not need to.
+* Priya gets a customer-success record opened, with a demo to schedule once Aarti marks the build ready.
+Tanvi's part is over. She will see Annapurna again in her retention view in ninety days, and Farhan will see the second-year renewal commission if Sunita renews. Neither of them touches the organization that is about to be built.
+Sunita Deshmukh
+pays · deal won
+brief · plan · payment
+Aarti Kulkarni
+Platform Admin
+Scenes 5–7 · Build, demo, go-live
+Scene 5Building the organizationProviyaa ConsoleDays 15–18
+Aarti turns a brief into a working restaurant group
+Aarti opens the build queue and starts with the organization itself. She creates Annapurna Hospitality as a franchise-type organization with Sunita as owner and Prashant as organization admin. The platform issues Prashant's admin credential once, on screen, and Aarti records that it was issued — never the credential itself.
+Then the three outlets, as locations under the organization, each with the module set from Omkar's brief. Express gets four modules; Main gets eight. Ganj Golai is created as a franchise location with Deepak as its owner — the organization type does the scoping, so Aarti does not have to hand-hide anything.
+Then the workflow. Aarti opens the canvas, chooses Annapurna Main, and presses build from real config — the platform draws the flow Main already has from its modules and roles. She adjusts it to the brief: the captain's sign-in leads to orders and the floor; the kitchen's leads to the kitchen display only; the cashier's to POS and bills. She adds a rule block — bill over ₹5,000 needs a manager — because Sunita asked, and notes in the brief that the rule is drawn but the platform does not yet enforce it. She saves, reviews the diff, enters Vikram's builder passcode, and applies. Annapurna's roles now see exactly what the brief said they should.
+Ishaan applies the brand properly this time: the red from the menu card, the Marathi-capable font, the logo on the guest's phone. Arjun runs the standard new-tenant check: data isolation, audit trail on, GST fields present. Sameer adds Annapurna to his live-operations watch so that its first Saturday is visible to him before Amol knows anything is wrong.
+The customs that configuration could not meet — the Marathi kitchen screen, monthly corporate billing — Aarti files as product requests, each tagged with the organization and the brief. Neha will see them Monday.
+Aarti marks the build ready for demo. Priya's queue updates.
+Aarti Kulkarni
+Platform Admin
+configured org · open requests
+Priya Nair
+Customer Success
+Scene 6The demo, on their own restaurantMerchant App · Console SupportDays 19–21
+Priya demonstrates Annapurna to Annapurna
+Priya does not demo the demo restaurant. She demos Annapurna Main, configured, branded, with the real menu loaded from the card Omkar photographed. In the room: Prashant, Kiran, Amol, and Chef Ramesh, who was not invited but came because it is his kitchen.
+She walks the spine of a service on their own screens. Swati books a table. Santosh scans it on his phone as a captain and orders. Ramesh sees it land on the pass in his kitchen. Pallavi bills it. Suresh sees the money. Each person is handed their own screen, on their own role, and asked to do the thing they do every day.
+This is where feedback starts. Ramesh says the ticket font is too small from the pass. Amol says he needs the family hall as its own view. Pallavi asks where the split-bill button is and finds it. Priya captures every one of these on the screen it was said about, in the merchant app's feedback control, so each arrives on the Console tagged with the organization, the role and the screen. Neha will read them without needing Priya to explain.
+Prashant sets his own passcode and, with Priya watching, changes one thing on the workflow canvas himself — the franchise outlet's kitchen role loses the menu module, because Deepak's chef should not be editing prices. He applies it. It works. That moment is the point of the demo: the merchant learns they can change the product without calling anyone.
+Go-live is set for the coming Monday. Priya marks the account live pending.
+Priya Nair
+Customer Success
+demo feedback · go-live date
+Sameer Jadhav
+Platform Operations
+Scene 7Go-live and the first fortnightMerchant App ↔ Proviyaa ConsoleDays 22–36
+The loop between the two platforms starts running
+Monday, 11am. Annapurna Main takes its first live order. Sameer has the organization pinned on his operations board and watches the first fifty tickets go through. Nothing breaks. At 1:40pm the kitchen screen at Express stops refreshing — the tablet's wifi dropped. Sagar, at the counter, taps report a problem on the frozen screen. It reaches Sameer tagged Annapurna Express · kitchen display · outlet manager before Sagar has finished typing. Sameer calls Sagar; it is the wifi, not the platform; Sameer notes it and Priya adds "check the router at Express" to Tuesday's call.
+Over the fortnight the feedback settles into three kinds, and the platform routes each differently:
+* Configuration — "the captain shouldn't see POS", "add a station for desserts". Prashant does these himself on the canvas, or Priya walks him through. No engineer involved.
+* Defects — "the round-off is wrong on split bills". Sameer reproduces it, confirms it is the platform not the merchant, and it goes to engineering as a bug with the organization's evidence attached. Fixed Thursday; Sameer verifies on Annapurna's own screen; Priya tells Pallavi.
+* Product requests — the Marathi kitchen screen, monthly corporate billing. Neha sees these alongside the same request from two other merchants and schedules the first for next month. Priya tells Prashant when, so Ramesh stops asking.
+Every one of these is visible to Prashant on the merchant side as a list: raised by whom, on which screen, what happened to it. He does not have to ask. On the platform side, Kavya can already see Annapurna's adoption — which modules are used daily, which have not been opened — and that becomes part of Priya's day-30 call.
+Priya's daily feedback call with Prashant runs for the first ten days, then twice a week, then weekly. The feedback control in the merchant app never goes away.
+Sameer Jadhav + Neha Bhosale
+Ops + Product
+fixes shipped · requests scheduled
+Priya Nair → Prashant
+closes the loop
+Scenes 8–9 · Run and grow
+Scene 8Steady stateEverywhereMonth 2 onward
+Annapurna runs; the platform recedes
+By the second month the platform is furniture. Amol opens the floor at ten and does not think about it. Ramesh bumps tickets. Pallavi bills. Meghana orders on One Latur and Akshay delivers it. Suresh reconciles the marketplace settlement on Friday and it matches. Section 4 is this scene, described one department at a time.
+What the platform team sees is the absence of noise. Sameer's board shows Annapurna green. Priya's weekly call gets shorter. Kavya's adoption view shows every module opened daily except reservations at Express — which Express does not have, so that is correct. Rohan sees the subscription renew on schedule.
+Annapurna
+runs itself
+daily operations
+Section 4
+a day, by department
+Scene 9ExpansionGrowth Panel · Console · One LaturMonth 4
+The network effect, in Latur
+Three things happen that only happen because the ecosystem is one thing:
+Deepak wants a second franchise. He tells Sunita; Sunita tells Prashant; Prashant raises it in the merchant app as an expansion request. It reaches Tanvi as an upsell on an existing account, not a new lead — no commission to Farhan this time, but a retention credit to Tanvi. Aarti adds a fourth location. It takes an afternoon.
+Sunil Wagh brings Latur Fresh Mart. The reseller sold the store vertical to Mohan Agarwal on the strength of Annapurna being on One Latur — Mohan's customers are Annapurna's customers. Sunil does first-line support himself; Priya only sees Fresh Mart when Sunil escalates. Nikhil's rules pay Sunil a reseller margin, not a referral commission, and Divya settles it monthly.
+The Zydus contract arrives. Zydus HR wants staff meals for four hundred people from Annapurna, delivered by OneLatur, billed monthly. This is a corporate customer on One Latur Business. Prakash sets up a recurring pickup slot; Sarika's board shows it every weekday at 12:15; Rohan's platform settlement now has a corporate line. Neha's monthly-billing feature, requested in Scene 5, ships in time.
+Prashant · Sunil · Zydus HR
+three doors in
+upsell · new merchant · corporate account
+The whole ecosystem
+grows by one merchant and one contract
+4 · A day, by department
+The same world seen sideways — what each person does when they sit down
+Section 3 followed one merchant through time. This section stops the clock on an ordinary Wednesday in month three and walks through every department, asking the only question that matters for a dashboard: what does this person open, what do they do with it, and who is waiting on them? Each entry names the home screen, the three phases of the day, and the handoffs out.
+The platform team · Proviyaa Console
+Vikram Deshpande
+Master Admin
+Morning
+Opens the Console overview: organizations, active vs onboarding, orders across every tenant, settlements pending. Reads Kavya's overnight summary. Approves the two new organizations Aarti built yesterday.
+Midday
+Reviews anything that changed a merchant's permissions — every workflow application across every tenant, in one list. Rotates the builder passcode monthly; today is not that day.
+Close
+Reads Sameer's incident log. Signs off Rohan's settlement run. Anything Arjun has flagged as a compliance exception gets a decision before he leaves.
+Board: Organizations · Activity · Approvals
+Aarti Kulkarni
+Platform Admin
+Morning
+The build queue: won deals not yet configured, oldest first. Today, a salon Sneha sold. Reads the brief, creates the organization, sets up two branches and eleven stylists' roles from the roster the brief included.
+Midday
+Workflow canvas for the salon: bookings → stylist calendar → billing. Applies it. Files two product requests the brief needed and configuration could not give (a package that spans branches; SMS reminders in Marathi).
+Close
+Marks the build ready. Priya's queue updates. Checks yesterday's Annapurna franchise addition went live cleanly — Deepak's second outlet.
+Board: Build queue · Organization detail · Workflow canvas
+Sameer Jadhav
+Platform Operations Manager
+Morning
+The operations board: every live organization as a tile, coloured by health — last order seen, kitchen screens responding, error rate, anything a merchant has reported in the last twelve hours. Two amber tiles: Fresh Mart's Barshi Road branch has not taken an order since 9am (they open at ten — false alarm), and Glow Studio has three reports on the booking screen (real).
+Midday
+Reproduces the Glow Studio booking issue on Glow's own org, confirms it is a platform defect, attaches the three merchant reports as evidence and hands it to engineering. Tells Priya, who tells Sameena at Glow.
+Close
+Lunch-rush and dinner-rush review: latency and errors during the two peaks across all restaurants. Writes the daily log Vikram reads. Confirms yesterday's fix is verified on the merchant that reported it.
+Board: Live operations · Incidents · Peak review
+Neha Bhosale
+Product Manager
+Morning
+The feedback inbox: everything raised through the merchant app across every organization, grouped by screen and by theme, with counts. "Kitchen screen in Marathi" now has four merchants behind it. Reads the demo feedback from Priya's session yesterday.
+Midday
+Turns themes into the next release: three things, with the merchants who asked attached to each so customer success can tell them when it ships. Reads Kavya's module adoption — reservations is barely used outside Annapurna Main; worth asking why before building more of it.
+Close
+Writes release notes in merchant language, not engineering language, so Priya can forward them unedited.
+Board: Feedback by theme · Release plan · Adoption
+Rohan Mehta
+Platform Finance Admin
+Morning
+Subscriptions: renewals due this week, failed payments to chase, the two organizations on trial ending Friday. One Latur settlements from yesterday: what each merchant is owed net of marketplace fee, matched to orders.
+Midday
+OneLatur rider payouts — Vinod's shift data becomes rupees per rider. Partner commissions from Divya's approved list join the same run.
+Close
+The settlement run at four. Everything that moves money moves now, in one batch, with Vikram's sign-off. Reconciliation report to Arjun for the audit trail.
+Board: Subscriptions · Settlements · Payouts · Run
+Priya Nair
+Platform Support Admin
+Morning
+Her book of accounts, sorted by attention needed: merchants in their first thirty days at the top, then anyone with an open report older than a day. Two demos to run this week — Aarti's salon build, and a re-demo for a store that changed managers.
+Midday
+The Glow Studio call: tells Sameena the booking issue is confirmed and when it ships. Runs the salon demo on the salon's own configured org, captures feedback on the screens it is about.
+Close
+Closes the loop on everything engineering shipped today — each fix goes back, by name, to the merchant who raised it. Forwards Neha's release notes. Day-30 call with Annapurna: adoption is good, Express still hasn't tried the QR sheet, she'll send Sagar the link.
+Board: Accounts by attention · Demos · Loop closure
+Arjun Iyer
+Security / Compliance Admin
+Morning
+Access review: any account that gained platform-level permission in the last day, any merchant admin who changed roles for more than five people at once. The audit trail of every permission application, cross-tenant.
+Midday
+New-tenant checks for the salon Aarti built: isolation verified, GST and licence fields present, data in region. Signs it off in the Console so Aarti's build shows the check.
+Close
+Reads Rohan's reconciliation. Any exception — a settlement that doesn't match its orders — is his to explain or escalate to Vikram.
+Board: Access review · Tenant checks · Audit
+Kavya Reddy
+Data / Analytics Admin
+Morning
+Platform numbers: orders across all verticals yesterday, by vertical, by city zone; new merchants; churn risk (organizations whose order volume fell for three weeks). Writes the overnight summary Vikram reads first.
+Midday
+Module adoption for Neha: which modules each organization opens daily, weekly, never. The answer to "should we build more reservations" lives here.
+Close
+The One Latur customer view for Manasi: repeat rate, cross-vertical customers (people who both eat and shop), the Plus membership's effect on order frequency.
+Board: Platform overview · Adoption · Customer analytics
+Ishaan Pawar
+Design Admin
+Morning
+Brand requests: quotes above threshold that Omkar or Sneha have flagged, each needing the merchant's colours and logo applied to their demo org before the quote goes out.
+Midday
+The platform's own surfaces: the One Latur homepage banner for the week, the Rider App's new job card that Prakash asked for.
+Close
+Reviews any merchant who changed their own appearance yesterday — the contrast safety net catches illegible combinations automatically, but he looks at the ones near the threshold.
+Board: Brand queue · Platform appearance · Merchant themes
+Growth & sales · Growth Panel and Commission Panel
+Manasi Joshi
+Growth Admin
+Morning
+The funnel: leads, qualified, quoted, won, by territory and by source. Referrals are converting at three times cold; she moves budget toward Aditya's partner programme.
+Midday
+Plan pricing review with Rohan. A new "counter" plan for single-outlet cafés, priced from what Express actually uses.
+Close
+Targets for next month per executive, set from Kavya's zone data — South Latur has forty restaurants and four on the platform.
+Board: Funnel · Territories · Plans · Targets
+Rahul Shinde
+Sales Manager
+Morning
+Pipeline review with Tanvi, Omkar and Sneha: every deal, its stage, its age. Anything stalled more than a week gets a next action assigned in the room.
+Midday
+Approves two quotes. Joins Tanvi at a hotel group — anything multi-outlet, he is in the room.
+Close
+Won-deal review: which sources, which executives, what the scoping briefs missed that Aarti had to come back for. That last one is the feedback that improves Omkar's template.
+Board: Pipeline · Approvals · Won analysis
+Tanvi Patil
+Sales Executive
+Morning
+My leads: new referrals and affiliate signups at the top, meetings today, follow-ups due. Calls the three new ones before ten — referral conversion is a time-decay curve.
+Midday
+Two pitches on the road, both on the seeded demo restaurant, both ending with the owner scanning a QR and watching their order hit a kitchen screen. Marks one qualified; requests scoping.
+Close
+Retention view: accounts she won ninety days ago, with Kavya's adoption beside each. Annapurna is green. A café she won in January has not opened the app in two weeks — she calls Priya before she calls the café.
+Board: My leads · Demo org · Retention
+Omkar Gaikwad
+Business Development Executive
+Morning
+Scoping queue: qualified leads needing a brief. One site visit today, a sweet shop with a small factory — store vertical with a manufacturing twist he'll need to describe carefully.
+Midday
+Writes the brief on site: locations, modules per location, roles with names, customs. Photographs the menu or price list for Ishaan.
+Close
+Reads Rahul's won-deal feedback: Aarti had to ask three questions about last week's brief that should have been in it. Updates his own checklist.
+Board: Scoping queue · Brief editor · Brief feedback
+Sneha Kale
+Service Provider Sales User
+Morning
+Service-vertical leads: salons, clinics, tuition centres, repair shops. The pitch is a demo salon with a live booking calendar and a stylist's phone view.
+Midday
+A physiotherapy clinic. The scoping is different from a restaurant — rooms not tables, packages not menus — and her brief template reflects that.
+Close
+Follow-ups. Glow Studio's second branch, sold last month, is live; she notes the referral Farida offered — a friend with a spa.
+Board: Service leads · Demo salon · Follow-ups
+Aditya Rao
+Partner Manager
+Morning
+Partner performance: Sunil's reseller book (six merchants, two escalations), Pooja's affiliate link (eleven signups this month, four converted), Farhan's referrals (two, both won).
+Midday
+Onboards a new reseller in Udgir — a computer shop that already services half the town's billing machines. Sets up their partner portal, their margin with Nikhil, their first-line support responsibilities.
+Close
+Reviews what Sunil's merchants escalated past him to Priya. If it's a pattern, Sunil needs training, not blame.
+Board: Partners · Onboarding · Escalations
+Sunil Wagh
+Reseller · Wagh Digital
+Morning
+Partner portal: his six merchants, each with a health colour. Fresh Mart's Barshi branch has a report open — he calls Vijay before Priya sees it.
+Midday
+Sells. A stationery shop near the college. The demo store on his laptop, branded Wagh Digital, is the same seeded org everyone uses.
+Close
+Checks his statement: last month's margin settled on the fifth, this month accruing. Escalates one Fresh Mart issue he could not solve — it reaches Priya tagged via Sunil Wagh.
+Board: My merchants · Demo store · Statement
+Pooja Mane · Dr. Farhan Shaikh
+Affiliate · Referral Partner
+Their day
+They do not have a working day on the platform. Pooja posts a link; Farhan mentions a name. What they have is a statement: signups attributed to them, which ones converted, what each is worth, when it was paid. It updates the moment a deal moves, so neither ever has to ask.
+Board: Statement · Referral form
+Nikhil Bhat
+Commission Manager
+Morning
+Rules: what a referral pays on a restaurant plan versus a store plan, what a reseller's margin is, how an upsell splits between the original referrer and the executive. Every rule versioned, every change dated.
+Midday
+Approvals: commissions that moved to payable overnight because a deal was won. He checks the attribution, not the arithmetic — the arithmetic is the rule's.
+Close
+Disputes. Pooja says a signup was hers; the link says otherwise. The attribution trail decides it.
+Board: Rules · Approvals · Disputes
+Divya Menon
+Commission Finance User
+Morning
+The Friday payout list: everything Nikhil approved, per partner, with the deals behind each line.
+Midday
+Hands it to Rohan's settlement run. Reconciles last Friday's against bank confirmations.
+Close
+Partner statements refresh. Farhan sees "paid".
+Board: Payout list · Reconciliation
+The merchant's head office · Annapurna Hospitality
+Sunita Deshmukh
+Organization Owner
+Morning
+One screen: yesterday's sales across three outlets, this month against last, what is owed to her by One Latur and Zomato, the two things Kiran has flagged for her decision. She does not scroll.
+Midday
+Visits Main. Looks at the floor screen over Amol's shoulder, not because she needs to but because she likes to.
+Close
+Kiran's weekly note on Friday. The fourth-outlet question, with Tejas's numbers attached.
+Board: Owner overview
+Prashant Deshmukh
+Organization Admin
+Morning
+Reports raised by staff yesterday, and what happened to each. Two new joiners from Rupali to give access to — a captain at Main, a cook at Express. He assigns roles; the platform does the rest.
+Midday
+The workflow canvas, when something needs changing. Today: Deepak's outlet gets the reservations module, because Ganj Golai is trying Sunday bookings. He applies it with his passcode. Deepak's sidebar changes.
+Close
+Priya's release notes. Tells Ramesh the Marathi kitchen screen ships next month. Checks the brand hasn't drifted — Akash changed the accent for a campaign and it's slightly off.
+Board: Settings · Users & roles · Workflow canvas · Reports raised
+Kiran Sawant
+Business Manager
+Morning
+Live operations across all three outlets on one screen: sales so far, covers, what is cooking, what is on the pass, tables occupied at each. Express is slow; he messages Sagar.
+Midday
+Pricing. Tejas's report shows the biryani margin has thinned since the rice price rose; he raises it on the menu across all outlets at once. The guest's phone quotes the new price on the next load.
+Close
+The daily close: each outlet's till against its sales, from Suresh. Anything off, he asks the outlet manager tonight, not Friday.
+Board: Live operations (group) · Menu & pricing · Daily close
+Vaishali More
+Operations Manager
+Morning
+Staffing across outlets from Rupali's roster: who is in, who is short. Ganj Golai has one captain out; she moves Santosh there for lunch.
+Midday
+Ganesh's stock alerts: Main is low on paneer, Express has surplus. A transfer between kitchens, logged.
+Close
+The things that went wrong today, across outlets, from the reports staff raised. Configuration ones she fixes with Prashant; platform ones are already with Sameer.
+Board: Staffing · Stock alerts · Issues
+Suresh Bhagwat · Mahesh Kadam
+Finance Manager · Accountant
+Morning
+Mahesh books yesterday: each outlet's bills, by payment method, against the bank. UPI matches. Cash at Express is ₹340 short; Sagar is asked.
+Midday
+Suresh reconciles the One Latur settlement Rohan ran yesterday against the orders it covers. Matches. Zomato's, as usual, does not, and the difference is logged for Komal to chase.
+Close
+GST for the month, drafted from the bills. CA Anand Joshi sees it read-only and comments. The Zydus corporate invoice generates on the first.
+Board: Daily close · Settlements · GST · Corporate billing
+Rupali Jagtap
+HR / Staff Manager
+Morning
+Attendance across outlets. Rosters for the week. A new captain joining Monday — she creates the person; Prashant gives the role.
+Midday
+Advances and salary. Santosh asked for an advance; it is recorded against his next pay.
+Close
+Who has not signed in for a week. One name; she calls.
+Board: Staff directory · Attendance · Rosters · Pay
+Akash Salunkhe
+Marketing Manager
+Morning
+One Latur performance: views, orders, the Sunday thali bundle's take-up. Loyalty: who is close to a reward.
+Midday
+Builds this weekend's offer — free dessert on orders over ₹600 — and schedules it on One Latur. It appears to Meghana on Saturday morning.
+Close
+The campaign's accent colour, which Prashant flagged. He fixes it.
+Board: Marketplace performance · Offers · Loyalty
+Ganesh Thorat · Shivaji Pawar
+Inventory Manager · Procurement Manager
+Morning
+Sachin's morning count arrives from the cold room at Main. Ganesh sees stock against par: paneer low, chicken fine, rice two days. Reorder points fire. Shivaji sees the list and raises orders to the two suppliers before nine.
+Midday
+Yogesh receives the mandi order and marks it against Shivaji's PO. Short two crates of onion; the discrepancy is logged, the supplier is asked.
+Close
+Wastage: what each kitchen threw out, entered by Nitin at the end of prep. Ganesh's weekly view shows Express wastes more coriander than it uses — a par-level problem, fixed by lowering it.
+Board: Stock · Reorders · Purchase orders · Receipts · Wastage
+Komal Waghmare
+Customer Support User
+Morning
+One Latur customer messages from last night: two "where is my order" (both delivered, both late — OneLatur's, she tags them for Priyanka), one "the dal was cold" (Main, Tuesday, 8:40pm — she can see the order, the kitchen time, the rider time).
+Midday
+Refunds or credits within her limit; above it, Kiran. Every resolution is on the customer's profile, so if Meghana writes again, the history is there.
+Close
+The Zomato settlement gap Suresh logged — she raises it with Zomato support, reference attached.
+Board: Customer messages · Order lookup · Resolutions
+Tejas Kulkarni · CA Anand Joshi
+Analyst · Viewer
+Their day
+Tejas builds the Friday pack: sales by outlet by day, margin by dish, covers, average bill, One Latur versus walk-in versus aggregator. He reads everything and changes nothing. Anand sees finance only, also read-only, and leaves comments Suresh acts on.
+Board: Reports · Finance (read)
+The restaurant floor · Annapurna Main, a Wednesday
+Amol Chavan
+Restaurant Manager
+10:00
+Opens the floor. Twenty-four tables, three zones, all blank. Swati's reservations for lunch show as held. Yesterday's close was clean. He checks the pass is up in the kitchen — Ramesh's screen shows on his own as "responding".
+13:15
+Lunch. The floor is colour: running tables with minutes and amounts, one flashing food-ready on table 14 that Santosh hasn't run yet, a guest on table 9 who tapped Call Waiter for water three minutes ago. He walks to 9 himself.
+22:30
+Last table settled. The close: bills against till, from Pallavi. Two reports raised by staff today, both configuration (a new dessert station, a captain who should see the reservations list). He forwards both to Prashant with a tap.
+Board: Floor · Guests calling · Daily close
+Balaji Kamble
+Zone Manager · family hall
+His day
+The same floor screen, filtered to the family hall's eight tables. Two captains report to him. He watches for the table that has been "running" forty minutes with nothing on the pass — someone forgot to send — and the one with food ready and no captain nearby.
+Board: Floor (zone)
+Santosh Ghuge
+Captain
+12:40
+Table 14, a family of five. He picks the table on his phone, searches the menu, adds two biryanis (one half, one full), a kurma, three rotis, sends. The kitchen has it before he has walked away. The table's PIN shows on his screen; the grandmother wants to order a dessert from her own phone, and he reads it to her.
+13:05
+His phone shows table 14's food is ready. He runs it. The guest's phone now says "served". A guest at 9 tapped Call Waiter; it's on his list until he taps done.
+13:40
+Table 14 wants to add two lassis. Same table, same bill, a second ticket to the kitchen with only the lassis on it. Pallavi will settle it all at once.
+Board: Captain · Table pick · Menu · Send
+Chef Ramesh Lokhande · Vishal Patil · Nitin Jadhav
+Kitchen Manager · Chef · Kitchen Staff
+11:30
+Ramesh has the pass screen: New, Cooking, Ready. Vishal has the same screen filtered to Tandoor. Nitin can see it, cannot touch it. The morning prep list comes from Ganesh's stock and yesterday's sales.
+13:00
+Twelve tickets across the board. A ticket that has been cooking eighteen minutes has gone amber; at twenty it will go red and pulse. Ramesh bumps table 14 to ready — the floor sees it, Santosh's phone sees it, the grandmother's phone sees it. Vishal bumps his own tandoor lines.
+16:00
+Between services, Nitin enters wastage. Ramesh raises the one thing he has wanted since the demo — the ticket font — and it's already in the queue with three other kitchens asking. He can see that.
+Board: Kitchen display · Station filter · Wastage
+Pallavi Shirsat
+Cashier · Billing Staff
+12:00
+Walk-in at the counter, two coffees. POS billing: same menu, same arithmetic, no table. Cash, change shown large.
+14:10
+Table 14 asks for the bill. She opens it from the floor: seven lines across two tickets, item total, service charge, SGST, CGST, round-off, to pay — the same number the grandmother's phone shows. They split it: father pays ₹1,200 on UPI, uncle pays the rest in cash. Two tenders, one bill. She prints the receipt on the 80mm roll.
+22:30
+The close. Her till against the day's bills, by method. She hands it to Amol.
+Board: POS billing · Bill · Settle · Print
+Swati Bhosale
+Reception / Reservations
+Her day
+Bookings from One Latur and the phone on one calendar. Sunday is full by Thursday. When a party arrives she seats them and the table goes from held to seated on Amol's floor. The waitlist on Sunday is hers; a guest waiting fifteen minutes gets a message from her, not a shout.
+Board: Reservations · Waitlist · Seating
+Meena Solanke
+Delivery Coordinator
+Her day
+The delivery desk is the boundary between Annapurna and OneLatur. A One Latur order comes in, cooks like any other, and lands on her desk as "ready to pack". She packs, labels, marks it ready. OneLatur's dispatch sees it; Sarika assigns Akshay; Meena's screen shows "rider 6 min away"; she hands over. She never talks to the rider's dispatcher. The Zydus lunch is a recurring 12:15 pickup she packs into crates.
+Board: Delivery desk · Pack · Handover
+Sagar Nikam
+Outlet Manager · Annapurna Express
+His day
+Eight tables, a counter, four modules. He is manager, cashier and, at quiet times, the person who reads the kitchen screen to the cook. His floor is small; his POS is where he lives. He raised the wifi issue on the first day and now knows what the frozen screen means.
+Board: Floor (small) · POS billing
+Deepak Bansode
+Franchise Owner · Ganj Golai
+His day
+Everything Amol sees, for his outlet; nothing Sunita sees for the group. His overview is his sales, his staff, his stock. When Prashant added reservations to his outlet, his sidebar gained it and he found it himself. He pays Annapurna a franchise fee that Suresh invoices monthly — visible to both.
+Board: Overview (franchise-scoped) · Floor · Finance (own)
+The store · Latur Fresh Mart
+Mohan Agarwal · Rekha Agarwal · Vijay Pawar
+Owner · Store Manager · Branch Manager
+Morning
+Mohan: margin by category yesterday, both branches, One Latur share of sales. Rekha: the listing — what is live on One Latur, what is out of stock and should be hidden, today's offer. Vijay: Barshi Road's own numbers and the staff in.
+Midday
+Rekha changes the atta price; it changes on One Latur and at Rani's till at once. Deepa's reorder alert on cooking oil is approved by Mohan with a tap.
+Close
+Both tills against sales. One Latur orders fulfilled versus cancelled — one cancelled for out-of-stock, which means the listing was wrong, which Rekha fixes.
+Board: Overview · Store listing · Branch
+Rani Sonawane · Arun Kale
+Cashier · Sales Staff
+Their day
+Rani scans and bills; UPI, cash, card. Arun is on the floor, and when a One Latur order arrives his phone shows a pick list — aisle by aisle. He picks, marks each item, and it lands on Sonali's desk. A short-dated item Ajay flagged is on the list as "substitute or skip"; he calls Rekha.
+Board: POS billing · Pick list
+Deepa Shinde · Bhaskar Rathod · Nilesh Jadhav · Ajay Wadekar
+Inventory · Warehouse · Purchase · Stock
+Morning
+Ajay counts the shelf-edge and flags short-dated. Deepa's stock view across both branches and the godown fires reorder points; Nilesh raises to distributors. Bhaskar receives yesterday's delivery into the godown and transfers to Barshi Road.
+Close
+Expiry report: what to discount tomorrow, what to write off. Wastage is money here too.
+Board: Stock · Warehouse · Purchase orders · Expiry
+Sonali Gore
+Delivery Coordinator
+Her day
+Same desk as Meena's, different goods. Arun's picked orders arrive; she bags, seals, marks ready. OneLatur assigns. The college canteen's weekly bulk order is Ramdas's van, not Akshay's bike — the platform knows by weight.
+Board: Delivery desk
+The salon · Glow Studio
+Farida Pathan · Zeenat Sheikh · Rukhsana Qureshi
+Owner · Service Manager · Branch Manager
+Morning
+Farida: yesterday's revenue by branch, by service, by stylist; membership renewals due. Zeenat: today's bookings across both branches, gaps, a stylist out sick. Rukhsana: MIDC's day.
+Midday
+Zeenat rebalances — Anjali is double-booked at three; Sameena moves one to Rahim with the customer's consent, by message.
+Close
+Ratings from today's customers, by stylist. One complaint, already with Ayesha.
+Board: Overview · Bookings · Ratings
+Nasreen Inamdar · Sameena Khan
+Receptionist · Booking Manager
+Their day
+Nasreen checks in the 11:00, takes a walk-in and fits her at 11:40 with whoever is free. Sameena owns the calendar: every stylist's day across two branches, load balanced, breaks held. A One Latur booking lands in a real slot, not a request queue.
+Board: Front desk · Calendar
+Anjali Deshpande · Rahim Sayyed
+Service Provider · Technician
+Their day
+Each has their own calendar on their phone: who is next, what they booked, notes from last time ("allergic to ammonia"). Anjali marks a service complete; Imran's billing sees it. Rahim's treatments are room-bound, so his calendar is also the room's.
+Board: My calendar · Customer notes
+Imran Mulla · Ayesha Momin
+Finance Staff · Customer Support
+Their day
+Imran bills completed services, sells packages, redeems memberships, and closes each branch. Ayesha handles reschedules and the complaint — she can see it was Rahim, at MIDC, at 4pm, and what was booked.
+Board: Billing · Packages · Customers
+OneLatur · dispatch and the road
+Prakash Rathod · Vinod Ghodke
+Delivery Admin · Delivery Operations Manager
+Morning
+Prakash: yesterday's deliveries, on-time rate by zone, rider utilisation, the cost per delivery. Vinod: today's shift plan against expected volume — Wednesday is quiet, twelve riders; Saturday will need thirty.
+Midday
+Prakash sets up the Zydus recurring pickup: 12:15 daily, four crates, a van. Vinod approves next week's rosters.
+Close
+Payout data to Rohan: deliveries per rider, incentives earned. Late-delivery review with Sarika.
+Board: Overview · Planning · Payout data
+Sarika Lande
+Dispatch Manager
+Her day
+The live board: every order marked ready by any merchant in Latur, every rider and where they are, every job in flight. Auto-assignment does most of it; she does the rest — a rider whose bike died, a merchant whose packing is running late, a stacked order from Annapurna and Fresh Mart for the same customer that Sheetal consolidates at the hub. Anything past its promise time turns red on her board and on Priyanka's.
+Board: Live board · Assignment · Late
+Dnyaneshwar Mule · Sandip Bhalerao
+Zone Manager · Fleet Manager
+Their day
+Dnyaneshwar knows South Latur — which lane floods, which building has no lift. His zone's riders, on-time rate, the addresses that keep failing. Sandip has the bikes: which is in service, whose insurance lapses Friday, the delivery bag Akshay reported torn.
+Board: Zone · Fleet
+Akshay Kadam
+Rider
+12:48
+His phone shows one job: Annapurna Main, pickup, ready in 6 minutes, then a drop 2.1km away, ₹42. He accepts. Meena's desk shows him coming.
+12:56
+Picks up. Scans the bag. Meghana's phone shows "Akshay is on the way".
+13:09
+Delivers. Photo of the handover. The next job is already on his screen — Fresh Mart, Sonali's desk, three bags. His earnings for the day tick up; he sees the number, not the calculation.
+Board: Rider App · one job at a time
+Ramdas Suryawanshi · Sheetal Kamble · Priyanka Gore
+Pickup Agent · Fulfilment Staff · Delivery Support
+Their day
+Ramdas drives the van: the college's bulk order, the Zydus crates, a return from a customer who got the wrong size. Sheetal runs the hub where a multi-merchant order is consolidated so Meghana gets one knock, not two. Priyanka answers "where is my rider" with the rider's actual position on her screen, and can message Akshay and Meghana at once.
+Board: Rider App (pickup) · Hub · Support
+5 · One customer, one day
+Meghana Kulkarni, a Saturday, three verticals, one identity
+The merchant sections above describe the ecosystem from the inside. This one is the outside: what it feels like to live in a city where every business is on the same platform, and why the shared customer identity is the thing that makes One Latur a marketplace and not a directory.
+08:40Breakfast · Annapurna MainTable QR · no login
+Meghana and a friend sit at table 9. She scans the sticker. The restaurant's own red, its own menu, "how many are eating" — she taps two. Filter coffee, a masala dose, a thatte idli. Her friend, on their own phone, scans the same sticker, lands on the same bill, and adds a badam milk. The PIN on the header is how they'd have proved that to a captain who asked. Ramesh's pass shows the ticket; Santosh runs it; her phone says served. She taps Pay Bill, sees the arithmetic, asks for the bill, pays Pallavi by UPI.
+She never signed in. As far as Annapurna's CRM is concerned this was a table session and a UPI reference. But the UPI reference is hers, and One Latur already knows her — so when she opens the app later, Annapurna is in her recents. Whether a guest session is linked back to a known customer is a decision, not an accident, and Section 8 leaves it for the technical phase.
+11:15Groceries · Latur Fresh MartOne Latur app · signed in
+At home, she opens One Latur. The homepage is Ishaan's weekend banner and Akash's free-dessert offer from Annapurna — because she ate there this morning, the offer is first. She goes to Fresh Mart, orders the week's groceries, and sees Rekha's atta price, changed an hour ago. Checkout: her saved address, her saved UPI, delivery in 40 minutes. Sandeep, who has Plus, would have seen free delivery here; she pays ₹19.
+At Fresh Mart, Arun's phone shows the pick list. Sonali bags it. Sarika's board assigns Akshay, who has just dropped an Annapurna order two streets away. Meghana's phone shows him coming. Twelve minutes later, one knock.
+15:00Salon · Glow Studio, MIDCOne Latur app · booking
+She books a haircut with Anjali for 4pm from the same app — a real slot on Sameena's calendar, not a request. Nasreen checks her in at 3:55. Anjali's phone shows Meghana's note from last visit. Imran bills it against the package Meghana bought in June. Ayesha's rating request arrives at 5:10; she gives five stars.
+What the platform now knowsCRM · one profile
+One person: ate at a restaurant, bought groceries, had a haircut, in one day, on one identity. Kavya's cross-vertical view counts her as the customer the marketplace exists for. Akash can target her with Annapurna's offer because she shops at Fresh Mart. Farida can see she came to Glow from One Latur, not a walk-in. And Priyanka, if Meghana ever writes "where is my rider", sees every order she has ever placed, from any merchant, on one screen.
+None of the three merchants see each other's data about her. All three benefit from her being one person.
+6 · The two platforms
+How feedback moves, and why it never gets lost
+The example in the brief — sales talks to the customer, the customer pays, admin builds, customer success demos, ops and development troubleshoot with daily feedback captured on two platforms — is Scenes 1 through 7. This section is only about the last part: the loop, once it is running.
+What the merchant side captures
+Every screen in the Merchant App has one control: report this. It is the same control on the kitchen display, the floor, the till, the stylist's calendar and the rider's job card. When Ramesh presses it on the pass, what leaves the building is not a message — it is a record: Annapurna Hospitality · Annapurna Main · Kitchen display · Kitchen Manager · Ramesh Lokhande · Wednesday 16:02, plus whatever he typed, plus what the screen was showing. He does not choose a category. He does not pick who to send it to. He does not leave the pass.
+The organization admin — Prashant — sees every report raised by anyone in his organization, in one list, with its status. That list is the merchant's side of the loop, and it means Prashant never has to ask "did anyone tell them about the font".
+What the platform side does with it
+Report raised→Console inbox→Sameer triages→one of three doors
+Door 1 · configuration
+Back to the merchant
+It is something the organization can change itself — a role that shouldn't see a screen, a station that needs adding. Priya walks Prashant through it, or does it with him. No engineer. Closed same day.
+Door 2 · defect
+To engineering, with evidence
+Sameer reproduces it on the merchant's own organization. If it is the platform, it goes to engineering carrying the report, the screen, the role and the reproduction. When it ships, Sameer verifies on the same merchant, and Priya tells the person who raised it — by name.
+Door 3 · request
+To product, counted
+It is something the platform does not do yet. Neha sees it beside every other merchant asking for the same thing. When it is scheduled, every merchant who asked is told when. When it ships, they are told it has.
+The fourth outcome
+Not the platform
+Sagar's frozen screen was the wifi. Sameer says so, kindly, and it is closed as "environment". It still counts — if Express reports the wifi three times, Priya raises the router with Prashant.
+The daily rhythm
+* Every day, first thirty days: Priya and the organization admin, fifteen minutes. What was raised, what happened, what is coming. The list does the agenda.
+* Every day, always: Sameer's peak review after lunch and after dinner. Every restaurant, every store, every salon — what slowed, what errored, what was reported during the rush.
+* Every week: Neha's theme review. Which requests grew. Which merchants are behind each.
+* Every release: Priya closes the loop, by name, to every person whose report is in it. Ramesh finds out the font shipped because someone told him, not because he noticed.
+The principle. A merchant should never have to leave their own app to be heard. The platform team should never have to guess where a complaint came from. And nobody — on either side — should have to ask what happened to something they raised.
+7 · The handoff map
+Every place work changes hands, in one table
+This is the connective tissue of Sections 3 and 4, flattened. Each row is a handoff: who gives, who receives, what actually passes between them, what triggers it, and where it appears for the receiver. When the technical phases are written, every integration point traces to a row here.
+From
+	To
+	What passes
+	Trigger
+	Lands in
+	Farhan / Pooja / Sunil
+	Tanvi / Sneha
+	A lead, attributed to its source
+	Referral submitted · link clicked · reseller logs it
+	Growth / My leads
+	Tanvi
+	Omkar
+	Qualified lead + demo notes
+	Marked qualified
+	Growth / Scoping queue
+	Omkar
+	Rahul
+	Scoping brief + proposed plan
+	Brief submitted
+	Growth / Approvals
+	Omkar
+	Ishaan
+	Menu card / logo photo
+	Quote above threshold
+	Console / Brand queue
+	Rahul
+	Sunita
+	Quote, plan, branded demo link
+	Quote approved
+	Merchant's inbox
+	Sunita
+	Rohan · Nikhil · Aarti · Priya
+	Payment → deal won → four fan-outs
+	Payment confirmed
+	Finance · Commission · Build queue · CS record
+	Nikhil
+	Divya
+	Approved commission
+	Deal won, attribution checked
+	Commission / Payout list
+	Divya
+	Rohan
+	Payout batch
+	Friday
+	Console / Settlement run
+	Aarti
+	Vikram
+	New organization for approval
+	Organization created
+	Console / Approvals
+	Aarti
+	Arjun
+	New tenant for compliance check
+	Build marked ready
+	Console / Tenant checks
+	Aarti
+	Neha
+	Product request from a brief
+	Custom need configuration can't meet
+	Console / Feedback
+	Aarti
+	Priya
+	Configured organization
+	Build marked ready
+	Console / Demos
+	Priya
+	Neha
+	Demo feedback, per screen
+	Captured during demo
+	Console / Feedback
+	Priya
+	Sameer
+	Go-live date
+	Account marked live pending
+	Console / Operations watch
+	Any merchant user
+	Sameer
+	A report, tagged org · location · screen · role · person
+	"Report this" pressed
+	Console / Inbox
+	Sameer
+	Engineering
+	Defect + reproduction + evidence
+	Reproduced on the merchant's org
+	Engineering queue
+	Sameer
+	Priya
+	Verified fix
+	Shipped and re-checked
+	Console / Loop closure
+	Priya
+	The person who raised it
+	"It shipped"
+	Every release
+	Merchant / Reports raised
+	Rupali
+	Prashant
+	New staff member
+	Joiner created
+	Merchant / Users & roles
+	Prashant
+	Any role in the org
+	Changed access
+	Workflow applied with passcode
+	That role's sidebar
+	Swati
+	Amol
+	A seated party
+	Reservation checked in
+	Merchant / Floor
+	Guest / Santos
+	Ramesh
+	A ticket
+	Order sent
+	Merchant / Kitchen display
+	Ramesh / Vishal
+	Santosh · the guest
+	Food ready
+	Ticket bumped
+	Floor · Captain · Guest phone
+	Guest
+	Santosh · Amol
+	Call waiter
+	Tapped on the phone
+	Merchant / Floor · Guests calling
+	Santosh · guest
+	Pallavi
+	A bill to settle
+	Bill asked for
+	Merchant / Bill
+	Pallavi
+	Mahesh
+	The day's tenders
+	Daily close
+	Merchant / Finance
+	Sachin / Ajay
+	Ganesh / Deepa
+	Morning count
+	Count entered
+	Merchant / Stock
+	Ganesh / Deepa
+	Shivaji / Nilesh
+	Reorder list
+	Par level crossed
+	Merchant / Purchasing
+	Shivaji / Nilesh
+	Yogesh / Bhaskar
+	Purchase order to receive
+	PO raised
+	Merchant / Receive
+	Nitin
+	Ganesh
+	Wastage
+	End of prep
+	Merchant / Wastage
+	Kiran / Rekha
+	Every till · One Latur
+	A price change
+	Menu edited
+	POS · guest phone · marketplace
+	Akash
+	Meghana
+	An offer
+	Scheduled on One Latur
+	One Latur home
+	Meghana
+	Ramesh / Arun / Sameena
+	An order · a pick list · a booking
+	Placed on One Latur
+	Kitchen · Pick list · Calendar
+	Arun
+	Sonali
+	A picked order
+	Pick complete
+	Merchant / Delivery desk
+	Meena / Sonali
+	Sarika
+	Ready for pickup
+	Marked ready
+	Dispatch / Live board
+	Sarika
+	Akshay
+	A job
+	Assigned
+	Rider App
+	Akshay
+	Meena · Meghana
+	ETA · picked up · delivered
+	Each state change
+	Delivery desk · customer phone
+	Sheetal
+	Akshay
+	A consolidated multi-merchant bag
+	Hub consolidation
+	Rider App
+	Komal / Ayesha
+	Priyanka
+	A delivery complaint
+	Tagged as OneLatur's
+	Dispatch / Support
+	Vinod
+	Rohan
+	Rider payout data
+	Shift closed
+	Console / Payouts
+	Rohan
+	Suresh · Mohan · Farida · Akshay
+	Settlement / payout
+	Settlement run
+	Merchant finance · Rider App
+	Suresh · Komal
+	Zomato / Swiggy
+	Settlement dispute
+	Mismatch logged
+	Aggregator support
+	Prashant
+	Tanvi
+	Expansion request
+	Raised in merchant app
+	Growth / Upsell
+	Zydus HR
+	Prakash · Rohan · Suresh
+	Corporate contract
+	Signed on One Latur Business
+	Recurring pickup · corporate billing
+	Kavya
+	Vikram · Neha · Manasi · Tanvi
+	Numbers
+	Overnight
+	Each one's overview
+	8 · What this deliberately leaves out
+So the next document knows where to start
+This script says what people do and who they hand to. It does not say how. The technical phases will be derived from it, and these are the questions they must answer — listed here so they are not answered by accident in the prose above.
+* Whether a guest table session is linked to a known customer, and on what signal. Section 5 assumes a UPI reference is enough; that is a decision with privacy weight.
+* What "report this" captures beyond the tag — a screenshot, the last actions, the state of the screen — and how long it is kept.
+* The franchise boundary in detail: which group-level numbers a franchisee may see (their own fee, certainly; the group's margin, certainly not; the group's menu, probably).
+* How the seeded demo organizations are kept fresh — they are a Growth asset, and Section 4 assumes they are always mid-service.
+* Offline. Scene 2 records that Tanvi wrote it down as a gap. It is the one capability a restaurant on unreliable internet will decide on.
+* Rule and approval enforcement. Aarti draws "bill over ₹5,000 needs a manager" in Scene 5 and notes it is not enforced. Which rules are enforced, where, is a phase of its own.
+* Where OneLatur's promise time comes from, and who is accountable when it is missed — the merchant's packing, the rider, or dispatch.
+* The commission model's edge cases: a referral that is also a reseller's merchant; an upsell on a referred account; a merchant who churns inside the clawback window.
+* Data residency, retention and audit — Arjun's whole job, described here in one line.
+* Multi-city. Every name in this script is in Latur. "One Latur" becoming "One Solapur" is a question this document does not ask.
+________________
+
+
+Eighty-seven named people. Nine scenes. Forty-four handoffs. Every one of them traceable to a role in the taxonomy this script was written from. The technical phases begin from Section 7.
+
+
+[a]One total reaction
+Nikhil Agarwal reacted with 👌 at 2026-09-07 8:28 am UTC
+[b]One total reaction
+Nikhil Agarwal reacted with 🆗 at 2026-09-07 8:32 am UTC

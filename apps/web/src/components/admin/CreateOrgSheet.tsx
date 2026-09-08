@@ -3,12 +3,15 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
+  ArrowRight,
   Building2,
   Check,
   Copy,
+  Handshake,
   KeyRound,
   LoaderCircle,
   Plus,
+  Sparkles,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -133,6 +136,36 @@ function CreatedPanel({
         <CopyField label="Admin password" value={created.adminPassword} />
       </div>
 
+      {created.cascade.length > 0 && (
+        <div
+          className="mt-5 rounded-[13px] px-4 py-3"
+          style={{
+            background: "rgb(180 238 42 / 0.12)",
+            border: "1px solid rgb(180 238 42 / 0.3)",
+          }}
+        >
+          <p className="flex items-center gap-1.5 text-[11.5px] font-extrabold uppercase tracking-wide text-[var(--lime-deep)]">
+            <Sparkles size={12} /> And the OS did this on its own
+          </p>
+          <ul className="mt-2 space-y-1">
+            {created.cascade.map((c, i) => (
+              <li key={i} className="flex gap-2 text-[13px] text-ink-2">
+                <ArrowRight size={13} className="mt-1 shrink-0 text-[var(--lime-deep)]" />
+                {c}
+              </li>
+            ))}
+          </ul>
+          {created.organizationId && (
+            <a
+              href={`/admin/organizations/${created.organizationId}`}
+              className="press mt-3 inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--lime-deep)]"
+            >
+              Open the onboarding chain <ArrowRight size={13} />
+            </a>
+          )}
+        </div>
+      )}
+
       <div className="mt-6 flex justify-end">
         <Button variant="lime" size="md" feedback="medium" onClick={onDone}>
           Done
@@ -142,9 +175,18 @@ function CreatedPanel({
   );
 }
 
-export function CreateOrgSheet() {
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
+export function CreateOrgSheet({
+  initialName,
+  sourceLeadId,
+  autoOpen,
+}: {
+  /** Prefilled when arriving from a won deal — docs/os claude .txt:479. */
+  initialName?: string;
+  sourceLeadId?: string;
+  autoOpen?: boolean;
+} = {}) {
+  const [open, setOpen] = useState(autoOpen ?? false);
+  const [name, setName] = useState(initialName ?? "");
   const [type, setType] = useState<"franchise" | "investor" | "">("");
   const [state, formAction] = useActionState(createOrganizationAction, INITIAL_STATE);
   const formRef = useRef<HTMLFormElement>(null);
@@ -212,6 +254,23 @@ export function CreateOrgSheet() {
                 </div>
 
                 <form ref={formRef} action={formAction} className="mt-6 space-y-4">
+                  {sourceLeadId && (
+                    <>
+                      <input type="hidden" name="sourceLeadId" value={sourceLeadId} />
+                      <div
+                        className="flex items-center gap-2.5 rounded-[13px] px-3.5 py-3 text-[13px] font-medium"
+                        style={{
+                          background: "rgb(180 238 42 / 0.12)",
+                          color: "var(--lime-deep)",
+                          border: "1px solid rgb(180 238 42 / 0.28)",
+                        }}
+                      >
+                        <Handshake size={15} className="shrink-0" />
+                        Built from a won deal — the Growth queue will show this
+                        organization once it&rsquo;s created.
+                      </div>
+                    </>
+                  )}
                   <div>
                     <label htmlFor="name" className={LABEL}>
                       Organization name

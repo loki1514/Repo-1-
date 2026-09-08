@@ -23,6 +23,14 @@ import {
   type OrgDomain,
 } from "@/lib/tenant";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import {
+  listActivities,
+  listHandoffs,
+  listRequirements,
+  listWorkItems,
+} from "@/lib/os/kernel";
+import { OnboardingPanel } from "@/components/admin/os/OnboardingPanel";
+import { evidenceKindFor } from "@/lib/os/orchestrator";
 import type { OrgTheme } from "@/lib/theme";
 import { createInviteAction } from "../actions";
 
@@ -50,16 +58,43 @@ export default async function OrganizationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [organization, admin, invites, rolesResult] = await Promise.all([
-    getOrganization(id),
-    getOrgAdmin(id),
-    listInvites(id),
+  const [organization, admin, invites, rolesResult, work, requirements, handoffs, activities] =
+    await Promise.all([
+      getOrganization(id),
+      getOrgAdmin(id),
+      listInvites(id),
+      supabaseAdmin
+        .from("roles")
+        .select("id, slug, name")
+        .eq("is_system", true)
+        .order("created_at"),
+      listWorkItems({ organizationId: id }),
+      listRequirements(id),
+      listHandoffs(id),
+      listActivities({ organizationId: id, limit: 60 }),
+    ]);
+
+  // Gap 1 + 3 — what each open item still needs, and the organization's outlets.
+  const [{ data: locationRows }, { data: evidenceRows }] = await Promise.all([
     supabaseAdmin
-      .from("roles")
-      .select("id, slug, name")
-      .eq("is_system", true)
+      .from("locations")
+      .select("id, name, kind, city, franchisee_name")
+      .eq("organization_id", id)
       .order("created_at"),
+    supabaseAdmin
+      .from("work_evidence")
+      .select("work_item_id, kind")
+      .in("work_item_id", work.map((w) => w.id).length ? work.map((w) => w.id) : ["00000000-0000-0000-0000-000000000000"]),
   ]);
+
+  const evidenceNeeded = Object.fromEntries(work.map((w) => [w.id, evidenceKindFor(w.kind)]));
+  const evidenceHave = [
+    ...new Set(
+      (evidenceRows ?? [])
+        .filter((e) => evidenceNeeded[e.work_item_id as string] === e.kind)
+        .map((e) => e.work_item_id as string),
+    ),
+  ];
 
   if (!organization) notFound();
   const roles = rolesResult.data ?? [];
@@ -177,6 +212,19 @@ export default async function OrganizationDetailPage({
         createAction={createInviteAction}
         roles={roles}
         invites={invites}
+      />
+
+      {/* The OS spine — onboarding stage, open work, requirements, handoffs */}
+      <OnboardingPanel
+        organizationId={organization.id}
+        stage={(organization as { onboarding_stage?: string | null }).onboarding_stage ?? null}
+        work={work}
+        requirements={requirements}
+        handoffs={handoffs}
+        activities={activities}
+        locations={locationRows ?? []}
+        evidenceNeeded={evidenceNeeded}
+        evidenceHave={evidenceHave}
       />
 
       {/* Appearance — per-org accent, typeface, ambient weather */}

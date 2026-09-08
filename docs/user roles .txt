@@ -1,0 +1,102 @@
+﻿1. Platform / Master Users
+Users who control the entire Proviyaa ecosystem.
+* Master Admin — complete platform control
+* Platform Admin — platform configuration and administration
+* Platform Operations Manager — operational monitoring
+* Product Manager — products, features, releases
+* Platform Finance Admin — billing, settlements, revenue
+* Platform Support Admin — support and organization assistance
+* Security / Compliance Admin — security, audit and compliance
+* Data / Analytics Admin — platform analytics
+* Design Admin - Website and App UI control 
+2. Growth / Sales Users(Only Screens ) 
+Users responsible for acquiring and growing merchants.
+* Growth Admin
+* Sales Manager
+* Sales Executive / Sales Agent
+* Business Development Executive
+* Service Provider Sales User
+* Partner Manager
+* Reseller
+* Affiliate
+* Referral Partner
+* Commission Manager
+* Commission Finance User
+These operate primarily through the Growth Panel / Commission Panel.
+3. Organization / Merchant Users( Only Screens )
+Users belonging to a merchant organization.
+* Organization Owner
+* Organization Admin
+* Business Manager
+* Branch / Location Manager
+* Operations Manager
+* Finance Manager
+* Accountant
+* HR / Staff Manager
+* Marketing Manager
+* Inventory Manager
+* Procurement Manager
+* Customer Support User
+* Analyst / Reporting User
+* Staff User
+* Viewer
+4. Vertical-Specific Users
+Restaurant
+* Restaurant Owner/ investor 
+* Franchise owner (Type)  
+* Restaurant Manager
+* Outlet Manager
+* Cashier
+* Zone Manager
+* * Waiter / Captain
+* Kitchen Manager
+* Chef
+* Kitchen Staff
+* Billing Staff
+* Inventory Staff
+* Purchase Staff
+* Delivery Coordinator
+* Reception / Reservation Staff
+The restaurant model needs these operational roles because its architecture includes POS, KOT, kitchen, tables, inventory, purchase, staff, reservations, delivery, CRM and payments.
+Store
+* Store Owner
+* Store Manager
+* Branch Manager
+* Cashier
+* Sales Staff
+* Inventory Manager
+* Warehouse Manager
+* Purchase Staff
+* Stock Staff
+* Delivery Coordinator
+Service
+* Service Business Owner
+* Service Manager
+* Branch Manager
+* Receptionist
+* Service Provider
+* Staff / Technician
+* Booking Manager
+* Finance Staff
+* Customer Support
+5. Customer / Marketplace Users
+Users interacting with One Latur.
+* Customer
+* Guest Customer
+* Registered Customer
+* Premium / Membership Customer
+* Business Customer
+* Corporate Customer
+Customer identity should be shared across restaurant, store and service experiences so the CRM can maintain a cross-commerce customer profile.
+6. Delivery / Fulfilment Users
+Users operating OneLatur.
+* Delivery Admin
+* Dispatch Manager
+* Delivery Operations Manager
+* Zone Manager
+* Fleet Manager
+* Rider / Delivery Partner
+* Pickup Agent
+* Fulfilment Staff
+* Delivery Support Agent
+The Rider operates through the Rider App, while dispatch and delivery operations remain centralized in OneLatur rather than inside the restaurant/store applications.

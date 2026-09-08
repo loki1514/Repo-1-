@@ -1,0 +1,1994 @@
+﻿PROVIYAA — MASTER OPERATING MODEL
+1. PURPOSE OF THIS DOCUMENT
+This document defines the complete operating story of Proviyaa.
+It describes:
+* Who exists inside the ecosystem
+* What each role is responsible for
+* How people enter and move through the organization
+* How a lead becomes a customer
+* How a customer becomes an active organization
+* How requirements are collected
+* How the product is demonstrated
+* How configuration and implementation happen
+* How operations take over
+* How support issues are handled
+* How product/development teams respond to operational feedback
+* How customers continuously provide feedback
+* How sales, customer success, operations, support, product, finance and management remain connected
+* How merchants operate their own organizations
+* How restaurant, store and service businesses use the platform
+* How customers interact with OneLatur
+* How fulfilment and delivery connect to the merchant ecosystem
+* How information flows from one role to another
+This document should eventually become the business and operational source of truth from which the system's phased functional requirements can be defined.
+This document intentionally does not define the technical implementation.
+________________
+
+
+2. THE PROVIYAA ECOSYSTEM
+Proviyaa should be understood as a connected ecosystem rather than a collection of independent dashboards.
+At the highest level there are six interconnected operating layers:
+Layer 1 — Platform
+The people responsible for the entire Proviyaa ecosystem.
+Layer 2 — Growth
+The people responsible for finding, converting and onboarding businesses.
+Layer 3 — Customer Success & Operations
+The people responsible for turning a sold customer into a successful, functioning customer.
+Layer 4 — Merchant Organization
+The business that actually uses Proviyaa.
+This may be:
+* Restaurant
+* Store
+* Service business
+Layer 5 — Customer / Marketplace
+The end consumer interacting with the merchant ecosystem through OneLatur and related customer experiences.
+Layer 6 — Fulfilment
+The people who physically or operationally fulfil orders, pickups and deliveries.
+________________
+
+
+3. THE CENTRAL OPERATING PRINCIPLE
+Every customer should have a continuous journey through Proviyaa.
+The journey does not end when Sales closes the deal.
+The journey is:
+Lead → Conversation → Qualification → Proposal → Payment → Onboarding → Requirement Collection → Configuration → Demo → Training → Go-Live → Daily Operations → Support → Feedback → Improvement → Renewal / Expansion
+Therefore, every department is effectively receiving an output from the previous department and creating an output for the next department.
+For example:
+Sales
+creates:
+Customer + commercial commitment + initial business understanding
+which becomes the input for:
+Administration / Onboarding
+which creates:
+Customer account + business structure + implementation requirements
+which becomes the input for:
+Customer Success
+which creates:
+Demonstrated and trained customer
+which becomes the input for:
+Operations
+which creates:
+Functioning customer environment
+which creates ongoing information for:
+Support
+which identifies:
+Problems, questions and operational friction
+which produces information for:
+Product / Development
+which creates:
+Fixes, improvements and product changes
+which returns value to:
+Customer Success + Operations + Customer
+This creates a continuous operating loop.
+________________
+
+
+4. THE PEOPLE IN THE SIMULATED PROVIYAA ORGANIZATION
+To make the prototype behave like a real organization, every major role should have a representative person.
+These people are not merely names attached to permissions.
+Each person has:
+* A department
+* A role
+* A manager
+* A working objective
+* Customers or employees they interact with
+* Daily tasks
+* Pending work
+* Escalations
+* Decisions
+* Performance indicators
+* Communication responsibilities
+________________
+
+
+5. PLATFORM LEADERSHIP
+5.1 Master Admin
+Person: Arjun Mehta
+Arjun represents ultimate platform ownership.
+His dashboard is not primarily about individual tasks.
+His dashboard answers:
+"What is happening across Proviyaa?"
+He sees:
+* Total organizations
+* Active organizations
+* New organizations
+* Revenue
+* Sales pipeline
+* Customer health
+* Open operational problems
+* Critical support issues
+* Product issues
+* Platform incidents
+* Pending approvals
+* Growth
+* Customer churn risks
+* Delivery ecosystem activity
+* Major escalations
+His typical day begins with the health of the entire ecosystem.
+He does not need to manually operate every department.
+He intervenes when something crosses an organizational threshold.
+________________
+
+
+6. PLATFORM ADMINISTRATION
+6.1 Platform Admin
+Person: Neha Shah
+Neha is responsible for keeping the platform organization operationally structured.
+Her day includes:
+* Reviewing organization creation
+* Reviewing platform-level configurations
+* Managing internal users
+* Reviewing pending administrative actions
+* Handling organizational setup issues
+* Checking whether teams have completed their work
+* Managing operational exceptions
+* Reviewing escalations
+She acts as a bridge between platform leadership and operating departments.
+________________
+
+
+7. PLATFORM OPERATIONS
+7.1 Platform Operations Manager
+Person: Rohit Kulkarni
+Rohit's question every morning is:
+"Is the ecosystem actually operating?"
+He reviews:
+* Customers onboarding today
+* Customers going live today
+* Customers experiencing issues
+* Pending operational tasks
+* Support escalations
+* Failed processes
+* Delayed implementations
+* Delivery/fulfilment problems
+* Merchant operational activity
+If a customer says:
+"The system was working yesterday but billing is failing today."
+Rohit becomes one of the people responsible for ensuring the issue moves from complaint to resolution.
+________________
+
+
+8. PRODUCT
+8.1 Product Manager
+Person: Aisha Khan
+Aisha is responsible for understanding what should change in Proviyaa.
+Her dashboard is driven by:
+* Customer requests
+* Repeated support problems
+* Operational feedback
+* Sales requirements
+* Feature requests
+* Product gaps
+* Usage patterns
+* Development status
+* Release priorities
+Her day is not simply:
+"Build features."
+It is:
+"Understand what the ecosystem needs next."
+________________
+
+
+9. FINANCE
+9.1 Platform Finance Admin
+Person: Vivek Shah
+Vivek manages the commercial side of the platform.
+He handles:
+* Customer payments
+* Subscription/payment status
+* Settlements
+* Revenue
+* Refunds
+* Commission-related financial activity
+* Outstanding amounts
+* Financial exceptions
+When Sales closes a customer, Finance becomes part of the lifecycle.
+A customer should not simply become "active" because a salesperson says so.
+The commercial journey must be visible.
+________________
+
+
+10. SUPPORT
+10.1 Platform Support Admin
+Person: Priya Nair
+Priya manages customer support operations.
+Her dashboard answers:
+* Who needs help?
+* What problems are open?
+* Which problems are urgent?
+* Who owns each issue?
+* How long has it been open?
+* Which issues require Operations?
+* Which require Product?
+* Which require Development?
+* Which require customer training?
+Support is therefore not merely a ticket inbox.
+It is the front door into the problem-resolution system.
+________________
+
+
+11. SECURITY / COMPLIANCE
+11.1 Security / Compliance Admin
+Person: Sameer Rao
+Sameer's responsibility is ensuring that sensitive platform activity is handled appropriately.
+He reviews:
+* Security events
+* Sensitive administrative activity
+* Access-related events
+* Compliance-related workflows
+* Audit activity
+* Exceptional access
+* Platform-level security concerns
+He is generally not part of normal customer conversations.
+He becomes involved when the nature of the activity requires his involvement.
+________________
+
+
+12. DATA / ANALYTICS
+12.1 Data / Analytics Admin
+Person: Kavya Iyer
+Kavya looks across the ecosystem.
+She answers questions such as:
+* Which vertical is growing?
+* Which sales channels convert best?
+* Which customers become successful fastest?
+* Which features are heavily used?
+* Which problems repeat?
+* Which businesses require the most support?
+* Which customer groups are most active?
+* Where are operational bottlenecks?
+Her role turns operating activity into organizational intelligence.
+________________
+
+
+13. DESIGN
+13.1 Design Admin
+Person: Dev Malhotra
+Dev manages the customer-facing visual experience.
+He receives:
+* Product feedback
+* UI complaints
+* Usability observations
+* Customer Success observations
+* Product Manager requirements
+* Website/app changes
+He ensures that design changes reflect the actual operating experience.[a]
+________________
+
+
+14. GROWTH ORGANIZATION
+Growth owns the beginning of the customer journey.
+The core chain is:
+Lead → Sales → Qualification → Commercial discussion → Conversion
+________________
+
+
+15. GROWTH ADMIN
+Person: Rhea Kapoor
+Rhea oversees the complete growth organization.
+Her dashboard shows:
+* Leads
+* Active prospects
+* Sales representatives
+* Pipeline
+* Conversion
+* Lost opportunities
+* Pending follow-ups
+* Partner-generated leads
+* Sales performance
+* Revenue pipeline
+She does not personally need to speak to every prospect.
+She manages the machine that allows Sales to do it.
+________________
+
+
+16. SALES MANAGER
+Person: Karan Patel
+Karan manages the sales team.
+Every morning he reviews:
+* New leads
+* Uncontacted leads
+* Follow-ups due today
+* Demonstrations scheduled
+* Proposals pending
+* Payments pending
+* Salesperson performance
+* Lost opportunities
+* High-value prospects
+He assigns leads.
+He monitors progress.
+He intervenes when representatives are stuck.
+________________
+
+
+17. SALES EXECUTIVE
+Person: Rahul Joshi
+Rahul is the person who actually talks to the prospective merchant.
+Example:
+Rahul receives a new lead:
+"Shree Ganesh Family Restaurant"
+He calls the owner.
+He discovers:
+* One restaurant
+* 35 tables
+* Two billing counters
+* Kitchen
+* Inventory requirements
+* Delivery requirement
+* Customer loyalty requirement
+* Existing manual purchase process
+* Existing accounting workflow
+Rahul records the information.
+The prospect moves from:
+New Lead
+to:
+Contacted
+then:
+Qualified
+then:
+Requirement Discussion
+then:
+Demo Required
+then:
+Commercial Discussion
+then:
+Payment Pending
+then:
+Converted
+The important principle is:
+Sales captures what the customer says.
+Sales should not invent technical requirements.
+________________
+
+
+18. BUSINESS DEVELOPMENT EXECUTIVE
+Person: Manish Verma
+Manish focuses on larger opportunities and partnerships.
+His customers may require:
+* Multiple locations
+* Franchise structures
+* Custom workflows
+* Enterprise relationships
+* Integrations
+* Larger onboarding programs
+His opportunities move through the same broad ecosystem but may require greater internal coordination.
+________________
+
+
+19. PARTNER / RESELLER / AFFILIATE ECOSYSTEM
+Partners can generate customers.
+For example:
+Referral Partner → Lead → Sales → Conversion → Commission
+The partner should be able to see the business outcome relevant to them.
+The internal organization can therefore understand:
+"This customer came through Partner X."
+That relationship remains connected to the customer lifecycle.
+________________
+
+
+20. COMMISSION MANAGEMENT
+Commission Manager — Sneha Rao
+Sneha validates:
+* Which customers came through which partner
+* Whether the conversion qualifies
+* Commission eligibility
+* Commission status
+* Pending disputes
+Commission Finance User — Amit Jain
+Amit handles the financial settlement side.
+This creates:
+Partner acquisition → Customer conversion → Commission calculation → Financial settlement
+________________
+
+
+21. THE FIRST MAJOR STORY
+FROM LEAD TO CUSTOMER
+Let us simulate the complete lifecycle.
+________________
+
+
+STEP 1 — A BUSINESS ENTERS PROVIYAA
+A restaurant owner sees Proviyaa.
+They submit an enquiry.
+The system creates a prospective customer.
+Sales receives the lead.
+Sales dashboard
+Rahul sees:
+NEW LEAD
+Shree Ganesh Family Restaurant
+Required:
+* Restaurant POS
+* Inventory
+* Purchase
+* Kitchen
+* Customer management
+* Delivery
+Rahul contacts the owner.
+________________
+
+
+22. STEP 2 — SALES DISCOVERY
+Rahul speaks to the customer.
+The conversation is not simply:
+"Would you like our product?"
+It is:
+"How does your business work today?"
+Rahul discovers:
+Business structure
+* One restaurant
+* One outlet
+* 35 tables
+Staff
+* Owner
+* Manager
+* Cashiers
+* Captains
+* Kitchen staff
+* Inventory staff
+Operational problems
+* Manual KOT coordination
+* Stock discrepancies
+* Purchase tracking issues
+* Customer information scattered across systems
+* Delivery orders handled separately
+Rahul records the discovery.
+________________
+
+
+23. STEP 3 — COMMERCIAL CONVERSION
+Rahul presents the appropriate Proviyaa offering.
+The customer agrees.
+The customer makes payment.
+Finance receives the commercial event.
+The customer is now ready to move into onboarding.
+The critical handoff is:
+Sales → Administration / Onboarding
+Sales should pass along:
+* Customer identity
+* Business identity
+* Business type
+* Locations
+* Commercial package
+* Requirements discovered
+* Promises made to customer
+* Important expectations
+* People who need to participate
+The customer should not have to repeat the same story five times.
+________________
+
+
+24. STEP 4 — CUSTOMER ONBOARDING
+Organization Admin
+Person: Nidhi Desai
+Nidhi receives the converted customer.
+Her responsibility is:
+"Turn a commercial customer into a properly organized Proviyaa organization."
+She verifies:
+* Organization details
+* Business type
+* Branches
+* Primary owner
+* Users
+* Roles
+* Initial requirements
+* Onboarding status
+She creates the internal customer record.
+________________
+
+
+25. STEP 5 — REQUIREMENT DISCOVERY
+The customer is now handed to Customer Success.
+Customer Success Manager
+Person: Aditya Rao
+Aditya's question is:
+"What does this customer actually need to successfully operate?"
+He meets the customer.
+He validates the requirements collected by Sales.
+He may discover:
+Sales captured POS + Inventory, but the customer also needs table management, kitchen workflows and delivery coordination.
+Aditya records the complete implementation understanding.
+________________
+
+
+26. REQUIREMENTS ARE NOT STATIC
+Customer requirements should become a living conversation.
+For example:
+Customer says:
+"We want table-wise ordering."
+Customer Success understands the operational requirement.
+Later:
+"We also want customers to scan a QR code."
+Later:
+"We want repeat customers to receive loyalty benefits."
+Later:
+"We need delivery orders."
+Each new requirement becomes part of the customer's evolving operational picture.
+This is important because the customer relationship does not stop at onboarding.
+________________
+
+
+27. STEP 6 — DEMONSTRATION
+Customer Success schedules a demo.
+The customer sees the product using their business context.
+Instead of giving a generic demonstration, Aditya demonstrates:
+* Opening the restaurant
+* Creating tables
+* Taking an order
+* Sending KOT
+* Kitchen processing
+* Billing
+* Inventory movement
+* Purchase
+* Customer information
+* Delivery flow
+* Reporting
+The customer can say:
+"This works."
+or:
+"This doesn't match how we operate."
+Both responses are valuable.
+________________
+
+
+28. DEMO FEEDBACK LOOP
+Suppose the customer says:
+"Our kitchen works differently. We need orders grouped by preparation section."
+Customer Success captures this.
+The request becomes an operational/product discussion.
+It may be:
+* Existing functionality requiring configuration
+* Training requirement
+* Operational issue
+* Product gap
+* Development requirement
+The important point is that Customer Success captures the observation first.
+________________
+
+
+29. STEP 7 — IMPLEMENTATION / CONFIGURATION
+Operations receives the customer.
+Operations Manager
+Person: Rohit Kulkarni
+Operations now ensures that the customer's journey moves toward actual use.
+The operational checklist may include:
+* Organization setup
+* Branch setup
+* Users
+* Roles
+* Business configuration
+* Product/catalog setup
+* Operational settings
+* Initial data
+* Training preparation
+* Demo validation
+* Go-live readiness
+The customer moves toward:
+Ready for Go-Live
+________________
+
+
+30. STEP 8 — TRAINING
+Customer Success trains the merchant's people.
+For the restaurant:
+Owner
+Learns:
+* Business overview
+* Reports
+* Financial visibility
+* Organization management
+Manager
+Learns:
+* Daily operations
+* Staff
+* Inventory
+* Purchase
+* Reports
+Cashier
+Learns:
+* POS
+* Billing
+* Payments
+* Returns/cancellations where applicable
+Captain / Waiter
+Learns:
+* Tables
+* Orders
+* KOT
+Kitchen
+Learns:
+* Incoming orders
+* KOT
+* Preparation
+* Order status
+Inventory Staff
+Learns:
+* Stock
+* Transfers
+* Consumption
+* Adjustments
+Each role experiences Proviyaa differently.
+________________
+
+
+31. STEP 9 — GO LIVE
+The customer becomes operational.
+This is a major transition.
+The relationship changes from:
+Implementation
+to:
+Daily Operations
+The customer is no longer simply being onboarded.
+They are now generating real operational activity.
+________________
+
+
+32. RESTAURANT DAILY SIMULATION
+Now simulate a normal restaurant day.
+________________
+
+
+Restaurant Owner
+Person: Mehul Shah
+Morning dashboard:
+* Yesterday's sales
+* Today's business
+* Outstanding issues
+* Staff overview
+* Inventory alerts
+* Purchase status
+* Customer activity
+* Operational alerts
+His primary question:
+"Is my business healthy?"
+________________
+
+
+33. RESTAURANT MANAGER
+Person: Pooja Mehta
+Her dashboard is operational.
+She checks:
+* Staff
+* Tables
+* Orders
+* Kitchen
+* Cashiers
+* Inventory
+* Pending tasks
+* Customer complaints
+Her primary question:
+"Is today's outlet running properly?"
+________________
+
+
+34. CASHIER
+Person: Rakesh
+Rakesh starts his shift.
+He:
+* Opens the billing workflow
+* Handles orders
+* Processes payments
+* Handles customer billing questions
+* Manages relevant transaction exceptions
+* Completes his shift
+His dashboard is deliberately operational.
+He does not need to see platform-level administration.
+________________
+
+
+35. CAPTAIN / WAITER
+Person: Imran
+Imran:
+* Receives table assignments
+* Takes orders
+* Sends orders to kitchen
+* Updates table status
+* Communicates with customers
+* Handles order modifications
+His experience is centered around service speed.
+________________
+
+
+36. KITCHEN
+Kitchen Manager — Joseph
+Joseph sees:
+* Incoming KOTs
+* Preparation status
+* Delays
+* Kitchen sections
+* Completed orders
+Chef and kitchen staff act on those orders.
+The restaurant's operational chain becomes:
+Customer → Captain → POS → KOT → Kitchen → Completed Order → Billing → Customer
+________________
+
+
+37. INVENTORY
+Inventory Manager — Farhan
+Farhan reviews:
+* Current stock
+* Low-stock items
+* Consumption
+* Adjustments
+* Transfers
+* Purchase requirements
+If stock is low:
+Inventory → Purchase
+________________
+
+
+38. PROCUREMENT
+Procurement Manager — Anjali
+Anjali sees purchase requirements.
+She can review:
+* Requested items
+* Suppliers
+* Quotes/rates
+* Purchase requirements
+* Pending approvals
+* Orders
+* Receiving status
+The organization therefore has:
+Inventory requirement → Procurement → Purchase → Receiving → Stock
+________________
+
+
+39. STORE SIMULATION
+Now the same ecosystem operates differently for a store.
+Store Owner
+Person: Suresh Agarwal
+He sees:
+* Sales
+* Inventory
+* Branches
+* Purchase
+* Customers
+* Delivery
+* Reports
+________________
+
+
+Store Manager
+Person: Priyanka Shah
+She manages:
+* Staff
+* Sales
+* Stock
+* Daily operations
+* Branch performance
+________________
+
+
+Cashier
+Person: Deepak
+Deepak handles:
+* Billing
+* Payments
+* Returns/exceptions
+* Customer interaction
+________________
+
+
+Inventory Manager
+Person: Harish
+Harish manages:
+* Stock
+* Warehouse
+* Transfers
+* Replenishment
+________________
+
+
+Purchase Staff
+Person: Monica
+Monica handles:
+Requirement → Supplier → Purchase → Receiving
+________________
+
+
+40. SERVICE BUSINESS SIMULATION
+Now consider a service business.
+Service Business Owner
+Person: Rahul Bhat
+He sees:
+* Appointments
+* Revenue
+* Staff
+* Customers
+* Service performance
+* Branches
+________________
+
+
+Receptionist
+Person: Tanya
+Her day is centered around:
+* Incoming customers
+* Bookings
+* Rescheduling
+* Customer communication
+* Service assignment
+________________
+
+
+Service Provider
+Person: Drishti
+Her workflow is:
+Booking → Customer → Service → Completion → Feedback
+________________
+
+
+Service Manager
+Person: Nikhil
+He manages:
+* Staff schedules
+* Bookings
+* Service capacity
+* Customer complaints
+* Operational performance
+________________
+
+
+41. THE SHARED CUSTOMER
+The customer should not become three unrelated people simply because they interact with:
+* Restaurant
+* Store
+* Service business
+Example:
+A customer named:
+Aarav
+may:
+1. Order from a restaurant
+2. Buy from a store
+3. Book a service
+4. Receive delivery
+5. Accumulate loyalty/membership activity
+6. Contact support
+The ecosystem should conceptually understand:
+"This is the same customer."
+This creates the cross-commerce customer relationship.
+________________
+
+
+42. CUSTOMER / ONELATUR EXPERIENCE
+The customer enters OneLatur.
+The customer can discover:
+* Restaurants
+* Stores
+* Services
+* Offers
+* Orders
+* Bookings
+* Memberships
+* Customer support
+The customer becomes the common consumer identity across experiences.
+________________
+
+
+43. CUSTOMER ORDER STORY
+A customer opens OneLatur.
+They select a restaurant.
+They place an order.
+The order moves through:
+Customer → Merchant → Kitchen/Store/Service → Fulfilment → Customer
+For a restaurant:
+Customer → Restaurant → POS → Kitchen → Ready → Dispatch → Rider → Customer
+________________
+
+
+44. DELIVERY OPERATIONS
+Delivery should be centrally coordinated.
+Delivery Admin
+Person: Vikram Singh
+Vikram sees:
+* Active deliveries
+* Pending dispatch
+* Delivery zones
+* Riders
+* Exceptions
+* Delayed orders
+________________
+
+
+Dispatch Manager
+Person: Shweta
+Shweta decides operationally:
+"Which available fulfilment resource should handle this delivery?"
+________________
+
+
+Rider
+Person: Sameer
+Sameer operates through the Rider App.
+He sees:
+* Assigned pickup
+* Pickup location
+* Delivery location
+* Order details required for fulfilment
+* Delivery status
+* Completion
+The rider should not need access to the merchant's entire internal business system.
+________________
+
+
+45. CUSTOMER SUPPORT STORY
+Now something goes wrong.
+A customer places an order.
+The order is delayed.
+The customer contacts support.
+Delivery Support Agent
+Person: Priti
+Priti sees the customer's issue.
+She investigates the operational status.
+Possible outcomes:
+Situation A
+Order is simply delayed.
+Support communicates with the customer.
+Situation B
+Restaurant has not prepared it.
+Support coordinates with merchant operations.
+Situation C
+Rider has a problem.
+Delivery Operations becomes involved.
+Situation D
+Payment problem.
+Finance/payment operations becomes involved.
+Situation E
+System problem.
+Platform Operations / Product / Development becomes involved.
+The support agent should not need to manually understand every department.
+The workflow should guide the issue toward the correct owner.
+________________
+
+
+46. THE MOST IMPORTANT LOOP — TROUBLESHOOTING
+Now consider the core loop described in the requirement.
+Customer says:
+"Something isn't working."
+The journey is:
+Customer → Support → Operations → Product/Development → Fix/Change → Customer Success → Customer
+________________
+
+
+47. EXAMPLE: RESTAURANT BILLING PROBLEM
+Restaurant manager reports:
+"Cashier cannot complete a certain billing scenario."
+Support receives the complaint.
+Support captures:
+* Customer
+* Organization
+* Outlet
+* User
+* Problem
+* What happened
+* When it happened
+* Business impact
+* Evidence
+* Reproduction information
+Support attempts basic troubleshooting.
+If unresolved:
+Support → Operations
+Operations investigates.
+If the issue appears to be a product defect:
+Operations → Product / Development
+________________
+
+
+48. PRODUCT TEAM RESPONSE
+Product Manager Aisha reviews the issue.
+She asks:
+Is this a one-off configuration issue or a broader product problem?
+If it is a product problem, it enters the product work cycle.
+Development investigates.
+The team may discover:
+* Incorrect behaviour
+* Missing workflow
+* UI problem
+* Data problem
+* Configuration problem
+* Requirement misunderstanding
+The issue is worked on.
+________________
+
+
+49. DAILY FEEDBACK
+The critical requirement is that feedback does not disappear after the ticket is closed.
+Customer Success should be able to say:
+"The customer reported this problem on Monday."
+Operations should be able to say:
+"We investigated it Tuesday."
+Product should be able to say:
+"We identified the underlying issue Wednesday."
+Development should be able to say:
+"The change was completed Thursday."
+Customer Success should then be able to say:
+"We demonstrated the change to the customer Friday."
+Customer should be able to confirm:
+"Yes, this now works."
+This creates a complete feedback chain.
+________________
+
+
+50. FEEDBACK MUST EXIST ON BOTH SIDES
+There are effectively two feedback perspectives.
+Customer-facing feedback
+The customer says:
+* What they expected
+* What happened
+* What they disliked
+* What they need
+* Whether the solution works
+Internal feedback
+Proviyaa teams say:
+* What they observed
+* What caused the issue
+* What was changed
+* What remains unresolved
+* What should be improved
+The two perspectives must remain connected.
+________________
+
+
+51. CUSTOMER SUCCESS BECOMES THE BRIDGE
+Customer Success is particularly important because it sits between:
+Customer ↔ Product/Operations
+Customer Success understands:
+* What the customer bought
+* What they expected
+* How they operate
+* What they were shown
+* What they are actually using
+* Where they struggle
+* What they are requesting
+Therefore Customer Success becomes the voice of the customer inside Proviyaa.
+________________
+
+
+52. SALES ALSO REMAINS CONNECTED
+Sales should not disappear after payment.
+A salesperson may still need to know:
+* Whether the customer successfully onboarded
+* Whether promised requirements were delivered
+* Whether expansion opportunities exist
+* Whether the customer is satisfied
+However, Sales does not become the operational owner.
+The customer moves into Customer Success and Operations.
+________________
+
+
+53. EXPANSION STORY
+After three months, Shree Ganesh Restaurant says:
+"We are opening another outlet."
+This should not be treated as a completely new customer.
+It becomes:
+Existing Organization → New Branch → Additional Users → Additional Operations → Additional Commercial Activity
+Sales or Business Development may become involved.
+Customer Success coordinates expansion.
+Operations supports implementation.
+Finance handles the commercial component.
+The organization grows inside Proviyaa.
+________________
+
+
+54. FRANCHISE STORY
+A restaurant may eventually become a franchise.
+The organization changes from:
+One Owner → One Outlet
+to:
+Brand → Multiple Franchise Owners → Multiple Outlets
+The platform must conceptually understand that these are related businesses but may have different operating ownership.
+This is where:
+* Restaurant Owner / Investor
+* Franchise Owner
+* Restaurant Manager
+* Outlet Manager
+* Zone Manager
+become meaningful.
+________________
+
+
+55. ZONE MANAGEMENT
+Suppose a restaurant group has:
+* Mumbai Zone
+* Pune Zone
+* Latur Zone
+The Zone Manager should focus on the businesses within their operational scope.
+Their daily activity becomes:
+* Outlet performance
+* Operational problems
+* Staffing
+* Inventory
+* Sales
+* Customer complaints
+* Delivery
+* Escalations
+They do not need the entire platform view.
+________________
+
+
+56. ORGANIZATION FINANCE
+A merchant Finance Manager sees the financial activity of their organization.
+For example:
+* Sales
+* Payments
+* Expenses
+* Purchases
+* Outstanding amounts
+* Branch performance
+* Financial reports
+The Accountant performs more transactional/accounting activity.
+The Owner sees the higher-level picture.
+________________
+
+
+57. ORGANIZATION HR / STAFF MANAGEMENT
+The HR / Staff Manager handles the people inside the merchant organization.
+The workflow is:
+Employee → Role → Branch → Schedule/Operations → Activity
+For example:
+Rahul joins a restaurant.
+He is assigned:
+Cashier → Latur Outlet
+His access and working experience are based on his operational role.
+________________
+
+
+58. THE VIEWER ROLE
+A Viewer is intentionally different.
+The Viewer may need visibility without operational control.
+The principle is:
+People should see what they need to perform their responsibility, not automatically see the entire organization.
+This concept applies throughout the ecosystem.
+________________
+
+
+59. DAILY OPERATING RHYTHM
+The prototype should simulate time.
+Morning
+Managers open dashboards.
+They see:
+* What happened yesterday
+* What is happening today
+* What is pending
+* What needs attention
+* What has been escalated
+During the day
+Operational activity generates events.
+Examples:
+* Lead created
+* Customer contacted
+* Demo scheduled
+* Payment received
+* Organization created
+* Requirement added
+* Order placed
+* Purchase created
+* Support issue raised
+* Delivery assigned
+* Customer feedback received
+Evening
+Managers review:
+* Completed work
+* Pending work
+* Failed work
+* Escalations
+* Customer issues
+* Financial performance
+End of day
+The ecosystem should leave behind a meaningful operational history.
+________________
+
+
+60. DEPARTMENTAL DAILY QUESTIONS
+Each department should have a fundamental question.
+Department
+	Daily Question
+	Master Admin
+	What is happening across Proviyaa?
+	Platform Admin
+	Is the organization structured correctly?
+	Platform Operations
+	Is the ecosystem operating correctly?
+	Growth Admin
+	Are we growing effectively?
+	Sales Manager
+	Is my sales pipeline moving?
+	Sales Executive
+	Which customer should I speak to next?
+	Finance
+	What money has moved and what remains pending?
+	Customer Success
+	Are customers successfully using what they bought?
+	Support
+	Who needs help?
+	Operations
+	What needs intervention?
+	Product
+	What should improve?
+	Development
+	What needs to be changed/fixed?
+	Design
+	What experience needs improvement?
+	Analytics
+	What is the ecosystem telling us?
+	Merchant Owner
+	Is my business healthy?
+	Manager
+	Is today's operation running?
+	Cashier
+	Can I complete today's transactions?
+	Inventory
+	Do we have the right stock?
+	Procurement
+	Are required purchases moving?
+	Customer
+	Can I discover, buy, book and receive what I need?
+	Delivery Operations
+	Are deliveries moving efficiently?
+	Rider
+	What do I need to pick up and deliver next?
+	________________
+
+
+61. THE MASTER CUSTOMER JOURNEY
+The complete customer lifecycle can therefore be represented as:
+1. Lead
+↓
+2. Sales Contact
+↓
+3. Qualification
+↓
+4. Requirement Discovery
+↓
+5. Demonstration
+↓
+6. Commercial Proposal
+↓
+7. Payment
+↓
+8. Customer Conversion
+↓
+9. Organization Creation
+↓
+10. Onboarding
+↓
+11. Detailed Requirement Discovery
+↓
+12. Configuration / Preparation
+↓
+13. Customer Demo
+↓
+14. Training
+↓
+15. Go-Live
+↓
+16. Daily Operations
+↓
+17. Support
+↓
+18. Feedback
+↓
+19. Operations Investigation
+↓
+20. Product / Development Investigation
+↓
+21. Change / Resolution
+↓
+22. Customer Validation
+↓
+23. Continuous Usage
+↓
+24. Expansion / Renewal / Additional Services
+This is the central Proviyaa operating cycle.
+________________
+
+
+62. THE MASTER INFORMATION JOURNEY
+Every major event should conceptually move information between people.
+For example:
+Sales knows:
+"The customer wants a restaurant management solution."
+Customer Success learns:
+"The customer has 35 tables and requires specific kitchen workflows."
+Operations learns:
+"The customer must be ready for go-live by a certain date."
+Support learns:
+"The customer's cashier is experiencing a problem."
+Product learns:
+"This problem is appearing repeatedly across restaurants."
+Development learns:
+"A product change is required."
+Customer Success learns:
+"The change is available."
+The customer learns:
+"The issue has been addressed."
+This is the information lifecycle.
+________________
+
+
+63. NO DEPARTMENT SHOULD BECOME A DEAD END
+A fundamental operating principle is:
+Every important action should create the next meaningful action.
+For example:
+Payment received should trigger the next stage of onboarding.
+Requirement completed should trigger the next implementation step.
+Demo completed should create feedback.
+Issue created should create ownership.
+Issue resolved should create validation.
+Customer feedback should create learning.
+A lead should not simply sit in Sales.
+A support ticket should not simply sit in Support.
+A requirement should not simply sit in Customer Success.
+Every important piece of work must have a journey.
+________________
+
+
+64. EXAMPLE OF A COMPLETE CUSTOMER DAY
+Consider Shree Ganesh Restaurant on a normal Tuesday.
+9:00 AM
+Restaurant Manager Pooja opens Proviyaa.
+She sees:
+* One inventory alert
+* Two pending purchase items
+* Three staff-related actions
+* Yesterday's sales
+* One support issue
+9:30 AM
+Inventory Manager Farhan reviews stock.
+He identifies low cooking oil.
+A purchase requirement is created.
+10:00 AM
+Procurement Manager Anjali reviews the requirement.
+She initiates the purchase workflow.
+11:30 AM
+Restaurant begins operations.
+12:15 PM
+Customer places an order.
+Captain Imran enters the order.
+KOT reaches kitchen.
+Chef Joseph processes it.
+12:30 PM
+Customer pays.
+Cashier Rakesh completes billing.
+1:15 PM
+Customer receives the order.
+If delivery is involved:
+Dispatch → Rider → Customer
+2:00 PM
+Customer leaves feedback.
+3:00 PM
+Support receives an issue from another customer.
+3:15 PM
+Support investigates.
+4:00 PM
+Operations receives an escalation.
+5:00 PM
+Product receives a recurring product observation.
+6:00 PM
+Customer Success reviews customer health.
+8:00 PM
+Restaurant Manager reviews the day's operations.
+9:30 PM
+Owner reviews the business summary.
+This is what it means for the platform to represent a living business.
+________________
+
+
+65. INTERNAL PROVIYAA DAY
+At the same time, Proviyaa employees are working.
+Sales
+Sales representatives are calling leads.
+Sales Management
+Managers are monitoring pipeline movement.
+Finance
+Finance is monitoring payments and settlements.
+Customer Success
+Customer Success is onboarding and training customers.
+Operations
+Operations is resolving implementation and operational issues.
+Support
+Support is handling incoming problems.
+Product
+Product is reviewing customer needs.
+Development
+Development is resolving product problems.
+Design
+Design is improving experiences.
+Analytics
+Analytics is looking at ecosystem-wide patterns.
+Leadership
+Leadership is looking at the entire organization.
+The important part is that all these activities are connected to the same ecosystem.
+________________
+
+
+66. CROSS-DEPARTMENT ESCALATION STORY
+A customer reports:
+"We cannot complete today's billing."
+The flow becomes:
+Customer
+↓
+Support Agent
+↓
+Support Admin
+↓
+Operations
+↓
+Product
+↓
+Development
+↓
+Resolution
+↓
+Operations Validation
+↓
+Customer Success
+↓
+Customer
+The issue then becomes:
+Resolved
+or, if not successful:
+Reopened
+The customer should not need to chase five departments.
+Internally, the responsibility moves between teams.
+________________
+
+
+67. REOPENED ISSUE STORY
+Suppose Development says:
+"Fixed."
+Operations tests it.
+It appears fixed.
+Customer Success demonstrates it.
+Customer says:
+"No, the original problem still exists."
+The issue returns.
+This is important.
+A development status of "completed" should not automatically mean the customer considers the problem solved.
+The real lifecycle is:
+Reported → Investigating → Changed → Internally Validated → Customer Validation → Resolved
+________________
+
+
+68. CUSTOMER SUCCESS HEALTH
+Customer Success should continuously understand whether customers are healthy.
+A customer may be:
+Healthy
+Using the platform successfully.
+Onboarding
+Still being implemented.
+At Risk
+Experiencing repeated problems or low adoption.
+Escalated
+Requires internal attention.
+Expansion Opportunity
+Growing or requesting additional capabilities.
+Inactive
+Not meaningfully using the platform.
+The Customer Success team's job is to act on these states.
+________________
+
+
+69. SALES + CUSTOMER SUCCESS CONNECTION
+A successful sale is not:
+"Payment received."
+A successful sale is:
+"The customer purchased, onboarded, adopted and received value."
+Therefore Sales and Customer Success should have a relationship.
+Sales creates the commercial expectation.
+Customer Success delivers the operational experience.
+This also creates accountability around promises made during sales.
+________________
+
+
+70. CUSTOMER SUCCESS + PRODUCT CONNECTION
+Customer Success hears statements such as:
+"I don't understand this."
+"We need this workflow."
+"This takes too many steps."
+"Our employees don't use this."
+"Our customers are confused."
+These are not all development bugs.
+They may indicate:
+* Training problems
+* UX problems
+* Product problems
+* Process problems
+* Business-model requirements
+Customer Success therefore becomes a major source of product intelligence.
+________________
+
+
+71. OPERATIONS + DEVELOPMENT CONNECTION
+Operations sees real-world failures.
+For example:
+"Three restaurant customers have reported the same problem."
+This changes the importance of the issue.
+A single customer issue may be support.
+A repeated issue may become:
+Product improvement.
+Operations therefore acts as an important signal generator.
+________________
+
+
+72. ANALYTICS CONNECTS THE ORGANIZATION
+Analytics should eventually be able to observe patterns such as:
+* Sales conversion
+* Onboarding duration
+* Customer activation
+* Support volume
+* Repeated issues
+* Feature usage
+* Customer retention
+* Expansion
+* Delivery performance
+* Merchant activity
+The point is not merely to display charts.
+The purpose is to answer:
+"Where should the organization act?"
+________________
+
+
+73. THE PLATFORM MANAGEMENT LOOP
+At the highest level:
+Market
+↓
+Growth
+↓
+Customer
+↓
+Onboarding
+↓
+Usage
+↓
+Operations
+↓
+Feedback
+↓
+Product Improvement
+↓
+Better Customer Experience
+↓
+More Growth
+This is the larger Proviyaa flywheel.
+________________
+
+
+74. THE MERCHANT LOOP
+For every merchant:
+Business
+↓
+Staff
+↓
+Operations
+↓
+Customer
+↓
+Transaction
+↓
+Payment
+↓
+Inventory / Fulfilment
+↓
+Customer Feedback
+↓
+Business Decision
+↓
+Next Transaction
+Proviyaa sits inside this loop.
+________________
+
+
+75. THE SUPPORT LOOP
+Problem
+↓
+Customer
+↓
+Support
+↓
+Investigation
+↓
+Resolution
+↓
+Customer Validation
+↓
+Feedback
+↓
+Product Improvement
+This loop should operate continuously.
+________________
+
+
+76. THE SALES LOOP
+Lead
+↓
+Sales Contact
+↓
+Qualification
+↓
+Demo
+↓
+Commercial Discussion
+↓
+Payment
+↓
+Customer
+↓
+Onboarding
+↓
+Customer Success
+↓
+Expansion
+↓
+Additional Revenue
+This creates a long-term commercial relationship rather than a one-time transaction.
+________________
+
+
+77. THE DELIVERY LOOP
+Customer Order
+↓
+Merchant
+↓
+Preparation
+↓
+Dispatch
+↓
+Rider
+↓
+Delivery
+↓
+Customer
+↓
+Feedback
+↓
+Merchant / Delivery Operations
+The fulfilment system is therefore connected to both the merchant and customer ecosystems.
+________________
+
+
+78. ROLE-TO-ROLE CONNECTION MAP
+The most important conceptual relationships are:
+Growth
+Growth Admin → Sales Manager → Sales Executive → Customer
+Commercial
+Sales → Finance
+Onboarding
+Sales → Admin → Customer Success
+Implementation
+Customer Success → Operations
+Support
+Customer → Support → Operations
+Product
+Support → Operations → Product
+Development
+Product → Development
+Validation
+Development → Operations → Customer Success → Customer
+Analytics
+All departments → Analytics → Leadership
+Delivery
+Customer → Merchant → Dispatch → Rider → Customer
+________________
+
+
+79. WHAT EACH DASHBOARD REPRESENTS
+A dashboard should not merely be a collection of widgets.
+Each dashboard represents the workday of a person.
+For example:
+Sales Executive Dashboard
+Should answer:
+Who do I need to speak to?
+Who needs a follow-up?
+Who needs a demo?
+Who is close to conversion?
+Who is waiting for me?
+________________
+
+
+Customer Success Dashboard
+Should answer:
+Which customers need attention?
+Who is onboarding?
+Who needs training?
+Who has open requirements?
+Who is at risk?
+Which customer needs a follow-up today?
+________________
+
+
+Operations Dashboard
+Should answer:
+What is broken?
+What is delayed?
+Which customer is blocked?
+Which team owns the next action?
+________________
+
+
+Product Dashboard
+Should answer:
+What should we improve?
+Which problems are recurring?
+Which customer requests matter most?
+________________
+
+
+Support Dashboard
+Should answer:
+Who needs help right now?
+Which issue is urgent?
+Which issue is waiting on another department?
+Which customer is waiting for a response?
+________________
+
+
+Merchant Owner Dashboard
+Should answer:
+How is my business doing?
+________________
+
+
+Manager Dashboard
+Should answer:
+What needs attention today?
+________________
+
+
+Staff Dashboard
+Should answer:
+What do I need to do right now?
+________________
+
+
+80. THE MOST IMPORTANT DIFFERENCE BETWEEN ROLES
+The same organization can contain multiple users looking at the same underlying business but asking completely different questions.
+For example:
+Owner
+"How much did we sell?"
+Manager
+"Why are today's operations delayed?"
+Cashier
+"Which bill do I need to complete?"
+Inventory Manager
+"What stock do I need?"
+Procurement
+"Which purchases need action?"
+Customer Support
+"Who has a problem?"
+Product Manager
+"Why are customers experiencing this problem?"
+Master Admin
+"What is happening across the ecosystem?"
+The prototype should demonstrate these differences.
+________________
+
+
+81. THE COMPLETE SIMULATED ORGANIZATION
+The prototype therefore contains people operating simultaneously.
+Platform
+Arjun — Master Admin
+Neha — Platform Admin
+Rohit — Operations
+Aisha — Product
+Vivek — Finance
+Priya — Support
+Sameer — Security
+Kavya — Analytics
+Dev — Design
+Growth
+Rhea — Growth Admin
+Karan — Sales Manager
+Rahul — Sales Executive
+Manish — Business Development
+Sneha — Commission Manager
+Amit — Commission Finance
+Customer Success
+Aditya — Customer Success Manager
+Nidhi — Onboarding / Organization Administration
+Merchant — Restaurant
+Mehul — Owner
+Pooja — Restaurant Manager
+Rakesh — Cashier
+Imran — Captain
+Joseph — Kitchen Manager
+Farhan — Inventory Manager
+Anjali — Procurement
+Tanya — Reception / Reservation
+Vikram — Delivery Coordination
+Merchant — Store
+Suresh — Store Owner
+Priyanka — Store Manager
+Deepak — Cashier
+Harish — Inventory
+Monica — Purchase
+Merchant — Service
+Rahul Bhat — Service Owner
+Nikhil — Service Manager
+Tanya — Reception
+Drishti — Service Provider
+OneLatur / Fulfilment
+Vikram Singh — Delivery Admin
+Shweta — Dispatch Manager
+Sameer — Rider
+Priti — Delivery Support
+Customers
+Aarav — Registered Customer
+Guest Customer — Anonymous/guest journey
+Business Customer — Business purchasing journey
+Corporate Customer — Organization-level customer journey
+These people should appear to be working simultaneously rather than existing as disconnected role definitions.
+________________
+
+
+82. THE PROTOTYPE'S MASTER STORY
+The complete simulation begins with:
+A business discovers Proviyaa.
+A salesperson contacts them.
+The salesperson understands their business.
+The business agrees.
+Payment occurs.
+The organization is created.
+Administration prepares the organization.
+Customer Success learns how the business works.
+The customer receives a tailored demonstration.
+The customer provides feedback.
+Operations prepares the environment.
+The merchant's employees are trained.
+The merchant goes live.
+The merchant begins using Proviyaa.
+Customers begin interacting with the merchant.
+Orders, services, purchases, inventory, payments and deliveries begin flowing.
+Problems begin appearing.
+Customers report problems.
+Support receives them.
+Operations investigates them.
+Some problems are solved operationally.
+Some become product issues.
+Product prioritizes them.
+Development changes the product.
+Operations validates the change.
+Customer Success communicates the improvement.
+The customer tests it.
+The customer confirms whether it works.
+Feedback continues.
+The merchant grows.
+The merchant opens another branch.
+Sales becomes involved again.
+Customer Success expands the relationship.
+Operations implements the new branch.
+The cycle repeats.
+Meanwhile:
+Leadership watches the entire ecosystem.
+Analytics identifies patterns.
+Finance follows the money.
+Security watches sensitive activity.
+Design improves the experience.
+Product continuously learns.
+Operations continuously stabilizes.
+Support continuously listens.
+Growth continuously brings new customers.
+________________
+
+
+83. THE CORE PHILOSOPHY
+The Proviyaa prototype should ultimately communicate one simple idea:
+Proviyaa is not a set of dashboards. It is an interconnected operating ecosystem where every person, business, customer, transaction, problem, decision and improvement has a place in a continuous lifecycle.
+A role is therefore not defined only by:
+"What screens can this person see?"
+A role is defined by:
+What does this person wake up needing to accomplish?
+What information do they receive?
+What decision do they make?
+What action do they take?
+Who receives the result of that action?
+What happens if the action fails?
+Who gets involved next?
+How does the original person know the matter was resolved?
+That is the operating model.
+________________
+
+
+84. THE MASTER CHAIN
+Everything ultimately connects through this chain:
+PEOPLE
+↓
+ROLES
+↓
+DEPARTMENTS
+↓
+WORK
+↓
+CUSTOMERS
+↓
+BUSINESS ACTIVITY
+↓
+TRANSACTIONS
+↓
+OPERATIONS
+↓
+PROBLEMS
+↓
+SUPPORT
+↓
+FEEDBACK
+↓
+DECISIONS
+↓
+PRODUCT CHANGE
+↓
+IMPROVEMENT
+↓
+CUSTOMER VALUE
+↓
+GROWTH
+↓
+MORE CUSTOMERS
+↓
+MORE OPERATIONS
+↓
+MORE LEARNING
+And the cycle continues.
+________________
+
+
+85. FINAL DEFINITION OF THE PROTOTYPE
+The prototype should therefore be capable of telling a complete story:
+"Show me Proviyaa on a Monday morning."
+I should be able to see:
+* Salespeople working leads
+* Managers managing their teams
+* Customers moving through onboarding
+* Payments being completed
+* Organizations being created
+* Requirements being collected
+* Customer Success conducting demos
+* Operations preparing customers
+* Merchants operating their businesses
+* Restaurant staff processing orders
+* Stores processing sales
+* Service businesses handling bookings
+* Customers using OneLatur
+* Delivery teams moving orders
+* Support receiving problems
+* Operations investigating problems
+* Product reviewing recurring feedback
+* Development working on changes
+* Customer Success validating improvements
+* Finance tracking commercial activity
+* Analytics identifying patterns
+* Leadership seeing the entire organization
+And if I select any person, I should conceptually be able to answer:
+Who are you?
+What is your responsibility?
+What are you doing today?
+What has been assigned to you?
+What information do you need?
+Who are you waiting for?
+Who is waiting for you?
+What happens when you complete your work?
+What happens when something goes wrong?
+That is the master operating script for Proviyaa.
+The later product definition should be derived from this operating story rather than the other way around.
+
+
+[a]Add design control , panel where designs on website , customer app , rider app and merchant apps needs to be controlled , uploaded and maintained like we maintain designs on UI level
