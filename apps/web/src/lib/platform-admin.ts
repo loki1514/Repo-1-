@@ -51,13 +51,13 @@ export const ROLE_LABEL: Record<PlatformRole, string> = {
  */
 export const SECTIONS_FOR_ROLE: Record<PlatformRole, string[]> = {
   master_admin: ["*"],
-  growth_admin: ["growth", "work", "organizations"],
+  growth_admin: ["growth", "work", "organizations", "success"],
   sales_manager: ["growth", "work", "organizations"],
   sales_executive: ["growth", "work"],
   business_development: ["growth", "work", "organizations"],
-  onboarding_admin: ["work", "organizations", "growth"],
-  customer_success: ["work", "organizations"],
-  operations: ["work", "organizations"],
+  onboarding_admin: ["work", "organizations", "growth", "success"],
+  customer_success: ["success", "work", "organizations"],
+  operations: ["work", "organizations", "success"],
 };
 
 export function canAccess(role: PlatformRole, section: string): boolean {

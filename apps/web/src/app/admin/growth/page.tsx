@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { requireSection } from "@/lib/platform-admin";
-import { listAllLeadEvents, listAssignableUsers, listLeads } from "@/lib/leads";
+import { listAllInteractions, listAllLeadEvents, listAssignableUsers, listLeads } from "@/lib/leads";
 import { listAllDealEvents, listDeals } from "@/lib/deals";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { listConvertedOrgsByLead } from "@/lib/organizations";
@@ -20,7 +20,7 @@ export const dynamic = "force-dynamic";
 export default async function GrowthPage() {
   await requireSection("growth");
 
-  const [leads, assignees, eventsByLead, deals, dealEventsByDeal, convertedByLead] =
+  const [leads, assignees, eventsByLead, deals, dealEventsByDeal, convertedByLead, interactionsByLead] =
     await Promise.all([
       listLeads(),
       listAssignableUsers(),
@@ -28,6 +28,7 @@ export default async function GrowthPage() {
       listDeals(),
       listAllDealEvents(),
       listConvertedOrgsByLead(),
+      listAllInteractions(),
     ]);
 
   // Gap 5 — money, alongside the deals it belongs to.
@@ -64,6 +65,7 @@ export default async function GrowthPage() {
         convertedOrgs={Object.fromEntries(convertedByLead)}
         paidByDeal={paidByDeal}
         commissionByDeal={commissionByDeal}
+        interactions={Object.fromEntries(interactionsByLead)}
       />
     </div>
   );

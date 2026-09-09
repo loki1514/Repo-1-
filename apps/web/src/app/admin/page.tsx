@@ -6,16 +6,30 @@ import { StatTile } from "@/components/admin/StatTile";
 import { listOrganizations } from "@/lib/organizations";
 import { platformStats } from "@/lib/platform-stats";
 import { inrShort } from "@/lib/bill";
+import { requirePlatformAdmin } from "@/lib/platform-admin";
+import { buildDashboard } from "@/lib/os/dashboard";
+import { RoleDashboard } from "@/components/admin/os/RoleDashboard";
 
 export const metadata: Metadata = { title: "Master Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
+  const me = await requirePlatformAdmin();
+  const dashboard = await buildDashboard(me.role, me.team, me.id, me.fullName ?? me.email);
+
+  // Everyone gets the dashboard their role asks for. Only the master admin
+  // also gets the platform inventory underneath it.
+  if (me.role !== "master_admin") {
+    return <RoleDashboard data={dashboard} />;
+  }
+
   const [organizations, stats] = await Promise.all([listOrganizations(), platformStats()]);
   const active = organizations.filter((o) => o.status === "active").length;
 
   return (
     <div className="space-y-5">
+      <RoleDashboard data={dashboard} />
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="t-h1">Master Admin</h1>

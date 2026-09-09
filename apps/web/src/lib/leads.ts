@@ -13,7 +13,30 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
  */
 
 export type LeadSource = "cold" | "referral" | "affiliate" | "reseller" | "inbound";
-export type LeadStatus = "new" | "contacted" | "qualified" | "disqualified";
+export type LeadStatus =
+  | "new"
+  | "contacted"
+  | "qualified"
+  | "requirement"
+  | "demo"
+  | "proposal"
+  | "payment_pending"
+  | "converted"
+  | "lost"
+  | "disqualified";
+
+export type InteractionKind = "call" | "meeting" | "message" | "email" | "demo" | "note";
+
+export type Interaction = {
+  id: string;
+  kind: InteractionKind;
+  summary: string;
+  detail: string | null;
+  participants: string | null;
+  occurred_at: string;
+  actor: string | null;
+  actor_email: string | null;
+};
 
 export type Lead = {
   id: string;
@@ -196,6 +219,55 @@ export async function listAllLeadEvents(): Promise<Map<string, LeadEvent[]>> {
   const emailByUser = await emailsFor(actors);
 
   const byLead = new Map<string, LeadEvent[]>();
+  for (const r of rows) {
+    const withEmail = { ...r, actor_email: r.actor ? (emailByUser.get(r.actor) ?? null) : null };
+    const list = byLead.get(r.lead_id) ?? [];
+    list.push(withEmail);
+    byLead.set(r.lead_id, list);
+  }
+  return byLead;
+}
+
+/**
+ * Day 1 §5.4 — Interactions as records. A call is a thing that happened, with
+ * participants and a time, not a sentence inside a status change.
+ */
+export async function recordInteraction(input: {
+  leadId?: string | null;
+  organizationId?: string | null;
+  kind: InteractionKind;
+  summary: string;
+  detail?: string | null;
+  participants?: string | null;
+  actor: string;
+}): Promise<void> {
+  if (!input.summary.trim()) throw new Error("recordInteraction: say what happened.");
+  const { error } = await supabaseAdmin.from("interactions").insert({
+    lead_id: input.leadId ?? null,
+    organization_id: input.organizationId ?? null,
+    kind: input.kind,
+    summary: input.summary.trim(),
+    detail: input.detail?.trim() || null,
+    participants: input.participants?.trim() || null,
+    actor: input.actor,
+  });
+  if (error) throw new Error(`recordInteraction: ${error.message}`);
+}
+
+/** Every lead's interactions, grouped by lead — same shape as listAllLeadEvents. */
+export async function listAllInteractions(): Promise<Map<string, Interaction[]>> {
+  const { data, error } = await supabaseAdmin
+    .from("interactions")
+    .select("id, lead_id, kind, summary, detail, participants, occurred_at, actor")
+    .not("lead_id", "is", null)
+    .order("occurred_at", { ascending: false });
+  if (error) throw new Error(`listAllInteractions: ${error.message}`);
+
+  const rows = (data ?? []) as (Omit<Interaction, "actor_email"> & { lead_id: string })[];
+  const actors = [...new Set(rows.map((r) => r.actor).filter(Boolean))] as string[];
+  const emailByUser = await emailsFor(actors);
+
+  const byLead = new Map<string, Interaction[]>();
   for (const r of rows) {
     const withEmail = { ...r, actor_email: r.actor ? (emailByUser.get(r.actor) ?? null) : null };
     const list = byLead.get(r.lead_id) ?? [];

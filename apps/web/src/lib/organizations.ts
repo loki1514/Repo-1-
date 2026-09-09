@@ -17,6 +17,7 @@ export type Organization = {
   contact_email: string | null;
   contact_phone: string | null;
   source_lead_id: string | null;
+  onboarding_stage: string | null;
   created_at: string;
 };
 
@@ -24,7 +25,7 @@ export async function listOrganizations(): Promise<Organization[]> {
   const { data, error } = await supabaseAdmin
     .from("organizations")
     .select(
-      "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, source_lead_id, created_at",
+      "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, source_lead_id, onboarding_stage, created_at",
     )
     .order("created_at", { ascending: false });
 
@@ -152,7 +153,7 @@ async function insertOrganizationRow(
         source_lead_id: input.sourceLeadId || null,
       })
       .select(
-        "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, source_lead_id, created_at",
+        "id, name, slug, type, status, legal_name, gstin, contact_email, contact_phone, source_lead_id, onboarding_stage, created_at",
       )
       .single();
 

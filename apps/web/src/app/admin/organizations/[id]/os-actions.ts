@@ -135,3 +135,24 @@ export async function createLocationAction(
     return { ok: false, error: clean(err, "Could not add that location.", /^$/) };
   }
 }
+
+/** Day 2 FR-04 — assign an organization-scoped role to a person. */
+export async function setOrgUserRoleAction(
+  organizationId: string,
+  orgUserId: string,
+  roleId: string,
+): Promise<WorkActionResult> {
+  try {
+    await requirePlatformAdmin();
+    const { error } = await supabaseAdmin
+      .from("org_users")
+      .update({ role_id: roleId || null })
+      .eq("id", orgUserId)
+      .eq("organization_id", organizationId);
+    if (error) throw new Error(error.message);
+    revalidatePath(`/admin/organizations/${organizationId}`);
+    return { ok: true, cascade: ["Role updated"] };
+  } catch (err) {
+    return { ok: false, error: clean(err, "Could not change that role.", /^$/) };
+  }
+}

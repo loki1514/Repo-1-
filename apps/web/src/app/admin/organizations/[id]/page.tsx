@@ -30,6 +30,7 @@ import {
   listWorkItems,
 } from "@/lib/os/kernel";
 import { OnboardingPanel } from "@/components/admin/os/OnboardingPanel";
+import { OrgPeopleCard } from "@/components/admin/os/OrgPeopleCard";
 import { evidenceKindFor } from "@/lib/os/orchestrator";
 import type { OrgTheme } from "@/lib/theme";
 import { createInviteAction } from "../actions";
@@ -67,7 +68,7 @@ export default async function OrganizationDetailPage({
         .from("roles")
         .select("id, slug, name")
         .eq("is_system", true)
-        .order("created_at"),
+        .order("name"),
       listWorkItems({ organizationId: id }),
       listRequirements(id),
       listHandoffs(id),
@@ -86,6 +87,24 @@ export default async function OrganizationDetailPage({
       .select("work_item_id, kind")
       .in("work_item_id", work.map((w) => w.id).length ? work.map((w) => w.id) : ["00000000-0000-0000-0000-000000000000"]),
   ]);
+
+  const { data: peopleRows } = await supabaseAdmin
+    .from("org_users")
+    .select("id, email, full_name, status, role_id, roles(name)")
+    .eq("organization_id", id)
+    .order("created_at");
+  const people = (peopleRows ?? []).map((r) => {
+    const rel = (r as { roles?: { name: string } | { name: string }[] | null }).roles;
+    const role = Array.isArray(rel) ? rel[0] : rel;
+    return {
+      id: r.id as string,
+      email: r.email as string,
+      full_name: (r.full_name as string | null) ?? null,
+      status: (r.status as string) ?? "active",
+      role_id: (r.role_id as string | null) ?? null,
+      role_name: role?.name ?? null,
+    };
+  });
 
   const evidenceNeeded = Object.fromEntries(work.map((w) => [w.id, evidenceKindFor(w.kind)]));
   const evidenceHave = [
@@ -213,6 +232,9 @@ export default async function OrganizationDetailPage({
         roles={roles}
         invites={invites}
       />
+
+      {/* Day 2 §5/§6 — the people in this organization and their roles */}
+      <OrgPeopleCard organizationId={organization.id} people={people} roles={roles} />
 
       {/* The OS spine — onboarding stage, open work, requirements, handoffs */}
       <OnboardingPanel

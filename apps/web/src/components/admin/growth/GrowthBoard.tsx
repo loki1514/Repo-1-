@@ -9,17 +9,19 @@ import {
   Handshake,
   History,
   IndianRupee,
+  PhoneCall,
   LoaderCircle,
   Plus,
   TriangleAlert,
   X,
 } from "lucide-react";
-import type { Lead, LeadEvent, LeadSource, LeadStatus } from "@/lib/leads";
+import type { Interaction, Lead, LeadEvent, LeadSource, LeadStatus } from "@/lib/leads";
 import type { Deal, DealEvent, DealStatus } from "@/lib/deals";
 import {
   advanceDealAction,
   advanceLeadAction,
   createLeadAction,
+  recordInteractionAction,
   recordPaymentAction,
   startScopingAction,
   updateDealBriefAction,
@@ -44,10 +46,17 @@ const SOURCE_LABEL: Record<LeadSource, string> = {
 };
 const NEEDS_REFERRER = new Set<LeadSource>(["referral", "affiliate", "reseller"]);
 
-const COLUMNS: { status: LeadStatus; label: string }[] = [
-  { status: "new", label: "New" },
-  { status: "contacted", label: "Contacted" },
-  { status: "qualified", label: "Qualified" },
+// Three working columns. The middle of the funnel (qualified through payment
+// pending) is one column because it is one conversation — the row itself
+// shows exactly which stage it is at.
+const COLUMNS: { key: string; label: string; statuses: LeadStatus[] }[] = [
+  { key: "new", label: "New", statuses: ["new"] },
+  { key: "contacted", label: "Contacted", statuses: ["contacted"] },
+  {
+    key: "in_play",
+    label: "Qualified → payment",
+    statuses: ["qualified", "requirement", "demo", "proposal", "payment_pending"],
+  },
 ];
 
 function age(iso: string): string {
@@ -185,10 +194,32 @@ function NewLeadSheet({
 // Advancing a lead + its history
 // ---------------------------------------------------------------------------
 
+// Day 1 §5.3, in full. 'disqualified' is the pre-qualification exit; 'lost'
+// is losing a deal that had already been quoted.
 const NEXT: Partial<Record<LeadStatus, { to: LeadStatus; label: string }[]>> = {
   new: [{ to: "contacted", label: "Mark contacted" }, { to: "disqualified", label: "Disqualify" }],
   contacted: [{ to: "qualified", label: "Mark qualified" }, { to: "disqualified", label: "Disqualify" }],
+  qualified: [{ to: "requirement", label: "Requirements gathered" }, { to: "lost", label: "Mark lost" }],
+  requirement: [{ to: "demo", label: "Demo given" }, { to: "lost", label: "Mark lost" }],
+  demo: [{ to: "proposal", label: "Proposal sent" }, { to: "lost", label: "Mark lost" }],
+  proposal: [{ to: "payment_pending", label: "Awaiting payment" }, { to: "lost", label: "Mark lost" }],
+  payment_pending: [{ to: "lost", label: "Mark lost" }],
 };
+
+const STATUS_LABEL: Record<LeadStatus, string> = {
+  new: "New",
+  contacted: "Contacted",
+  qualified: "Qualified",
+  requirement: "Requirement",
+  demo: "Demo",
+  proposal: "Proposal",
+  payment_pending: "Payment pending",
+  converted: "Converted",
+  lost: "Lost",
+  disqualified: "Disqualified",
+};
+
+const INTERACTION_KINDS = ["call", "meeting", "message", "email", "demo", "note"] as const;
 
 // ---------------------------------------------------------------------------
 // Scoping & the deal — touchpoint 3, only once a lead is qualified
@@ -476,9 +507,11 @@ function LeadRow({
   convertedOrg,
   paid,
   commission,
+  interactions,
 }: {
   lead: Lead;
   events: LeadEvent[];
+  interactions: Interaction[];
   deal: Deal | undefined;
   dealEvents: DealEvent[];
   convertedOrg: { id: string; name: string; slug: string } | undefined;
@@ -489,7 +522,22 @@ function LeadRow({
   const [note, setNote] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
+  const [intKind, setIntKind] = useState<string>("call");
+  const [intSummary, setIntSummary] = useState("");
+  const [intWho, setIntWho] = useState("");
+  const [logging, setLogging] = useState(false);
   const nextSteps = NEXT[lead.status] ?? [];
+
+  async function logInteraction() {
+    haptic("medium");
+    setLogging(true);
+    setError(null);
+    const res = await recordInteractionAction(lead.id, intKind, intSummary, intWho);
+    setLogging(false);
+    if (!res.ok) { setError(res.error); return; }
+    setIntSummary(""); setIntWho(""); setLogOpen(false);
+  }
 
   async function advance(to: LeadStatus) {
     haptic("medium");
@@ -517,6 +565,9 @@ function LeadRow({
           )}
         >
           {SOURCE_LABEL[lead.source]}
+        </span>
+        <span className="shrink-0 rounded-full bg-[rgb(18_21_15_/_0.07)] px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-muted">
+          {STATUS_LABEL[lead.status]}
         </span>
         <span className="tnum shrink-0 text-[12px] text-muted">{age(lead.created_at)}</span>
       </button>
@@ -579,7 +630,55 @@ function LeadRow({
             </div>
           )}
 
-          {lead.status === "qualified" && (
+          {/* Day 1 §5.4 — interactions, as records */}
+          <div className="border-t border-[var(--line)] pt-3">
+            <p className="t-label flex items-center gap-1.5 text-muted">
+              <PhoneCall size={11} /> Interactions
+            </p>
+            {interactions.length > 0 ? (
+              <ol className="mt-1.5 space-y-1.5">
+                {interactions.map((it) => (
+                  <li key={it.id} className="text-[12.5px] leading-snug text-ink-2">
+                    <span className="tnum text-muted">
+                      {new Date(it.occurred_at).toLocaleDateString("en-IN", {
+                        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+                      })}
+                    </span>
+                    {" · "}
+                    <span className="font-bold capitalize">{it.kind}</span>
+                    {" — "}{it.summary}
+                    {it.participants && <span className="text-muted"> · {it.participants}</span>}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-1 text-[12.5px] text-muted">Nothing logged yet.</p>
+            )}
+
+            {logOpen ? (
+              <div className="mt-2 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <select value={intKind} onChange={(e) => setIntKind(e.target.value)} className={FIELD}>
+                    {INTERACTION_KINDS.map((k) => (
+                      <option key={k} value={k} className="capitalize">{k}</option>
+                    ))}
+                  </select>
+                  <input value={intWho} onChange={(e) => setIntWho(e.target.value)} placeholder="Who was there" className={FIELD} />
+                </div>
+                <input value={intSummary} onChange={(e) => setIntSummary(e.target.value)} placeholder="What happened?" className={FIELD} />
+                <Button variant="glass" size="sm" disabled={logging || !intSummary.trim()} onClick={logInteraction}>
+                  {logging ? <LoaderCircle size={13} className="animate-spin" /> : <Check size={13} strokeWidth={2.8} />}
+                  Log it
+                </Button>
+              </div>
+            ) : (
+              <Button variant="ghost" size="sm" className="mt-1.5" onClick={() => setLogOpen(true)}>
+                <Plus size={13} strokeWidth={2.8} /> Log a call or meeting
+              </Button>
+            )}
+          </div>
+
+          {["qualified", "requirement", "demo", "proposal", "payment_pending", "converted"].includes(lead.status) && (
             <div className="border-t border-[var(--line)] pt-3">
               <DealPanel
                 lead={lead}
@@ -608,6 +707,7 @@ export function GrowthBoard({
   convertedOrgs,
   paidByDeal,
   commissionByDeal,
+  interactions,
 }: {
   leads: Lead[];
   assignees: { id: string; email: string; name: string | null; role: string | null }[];
@@ -617,6 +717,7 @@ export function GrowthBoard({
   convertedOrgs: Record<string, { id: string; name: string; slug: string }>;
   paidByDeal: Record<string, number>;
   commissionByDeal: Record<string, { partner: string; amount: string | null; status: string }>;
+  interactions: Record<string, Interaction[]>;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -633,7 +734,7 @@ export function GrowthBoard({
     return m;
   }, [deals]);
 
-  const disqualified = byStatus.get("disqualified") ?? [];
+  const closed = [...(byStatus.get("disqualified") ?? []), ...(byStatus.get("lost") ?? []), ...(byStatus.get("converted") ?? [])];
 
   function renderLead(lead: Lead) {
     const deal = dealByLead.get(lead.id);
@@ -647,6 +748,7 @@ export function GrowthBoard({
         convertedOrg={convertedOrgs[lead.id]}
         paid={deal ? (paidByDeal[deal.id] ?? 0) : 0}
         commission={deal ? commissionByDeal[deal.id] : undefined}
+        interactions={interactions[lead.id] ?? []}
       />
     );
   }
@@ -680,9 +782,9 @@ export function GrowthBoard({
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
           {COLUMNS.map((col) => {
-            const rows = byStatus.get(col.status) ?? [];
+            const rows = col.statuses.flatMap((st) => byStatus.get(st) ?? []);
             return (
-              <div key={col.status} className="glass rounded-[var(--r-xl)] p-4">
+              <div key={col.key} className="glass rounded-[var(--r-xl)] p-4">
                 <div className="relative z-10">
                   <div className="flex items-center gap-2">
                     <h2 className="text-[14px] font-extrabold">{col.label}</h2>
@@ -704,13 +806,13 @@ export function GrowthBoard({
         </div>
       )}
 
-      {disqualified.length > 0 && (
+      {closed.length > 0 && (
         <details className="glass rounded-[var(--r-lg)] p-4">
           <summary className="press cursor-pointer text-[13px] font-bold text-muted">
-            Disqualified ({disqualified.length})
+            Closed — converted, lost or disqualified ({closed.length})
           </summary>
           <div className="relative z-10 mt-3 space-y-2.5">
-            {disqualified.map(renderLead)}
+            {closed.map(renderLead)}
           </div>
         </details>
       )}

@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Bell,
   Blocks,
   Building2,
   ChefHat,
   Handshake,
+  HeartHandshake,
   ListChecks,
   LayoutDashboard,
   LifeBuoy,
@@ -26,6 +28,8 @@ const NAV = [
   { href: "/admin/organizations", label: "Organizations", icon: Building2, section: "organizations" },
   { href: "/admin/growth", label: "Growth", icon: Handshake, section: "growth" },
   { href: "/admin/work", label: "Work", icon: ListChecks, section: "work" },
+  { href: "/admin/success", label: "Customer Success", icon: HeartHandshake, section: "success" },
+  { href: "/admin/inbox", label: "Inbox", icon: Bell, section: "*" },
   { href: "/admin/users", label: "Users", icon: Users, section: "admin-only" },
   { href: "/admin/locations", label: "Locations", icon: MapPin, section: "admin-only" },
   { href: "/admin/operations", label: "Operations", icon: ChefHat, section: "admin-only" },

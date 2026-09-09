@@ -15,6 +15,13 @@ export default async function OrganizationsPage({
   const { fromLead, name: fromName } = await searchParams;
   const organizations = await listOrganizations();
 
+  // Day 2 FR-15 — the cross-organization onboarding view, so a manager can see
+  // which customers are mid-onboarding and which have stalled.
+  const inOnboarding = organizations.filter(
+    (o) => (o as { onboarding_stage?: string | null }).onboarding_stage &&
+      (o as { onboarding_stage?: string | null }).onboarding_stage !== "active",
+  );
+
   const active = organizations.filter((o) => o.status === "active").length;
   const onboarding = organizations.filter((o) => o.status === "onboarding").length;
   const suspended = organizations.filter((o) => o.status === "suspended").length;
@@ -56,6 +63,32 @@ export default async function OrganizationsPage({
           </div>
         ))}
       </div>
+
+      {inOnboarding.length > 0 && (
+        <div className="glass rounded-[var(--r-xl)] p-5">
+          <div className="relative z-10">
+            <h2 className="t-h3">Onboarding now</h2>
+            <p className="mt-1 text-[13px] text-muted">
+              Organizations part-way through the chain. Every one of these has work owed by
+              somebody.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {inOnboarding.map((o) => (
+                <a
+                  key={o.id}
+                  href={`/admin/organizations/${o.id}`}
+                  className="press glass-inset rounded-[12px] px-3.5 py-2.5"
+                >
+                  <span className="block text-[13.5px] font-bold">{o.name}</span>
+                  <span className="block text-[11.5px] uppercase tracking-wide text-muted">
+                    {String((o as { onboarding_stage?: string | null }).onboarding_stage).replace(/_/g, " ")}
+                  </span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       <OrgTable organizations={organizations} />
     </div>

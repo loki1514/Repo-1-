@@ -2,7 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { requirePlatformAdmin } from "@/lib/platform-admin";
-import { advanceLead, createLead, type LeadSource, type LeadStatus } from "@/lib/leads";
+import {
+  advanceLead,
+  createLead,
+  recordInteraction,
+  type InteractionKind,
+  type LeadSource,
+  type LeadStatus,
+} from "@/lib/leads";
 import {
   advanceDeal,
   startScoping,
@@ -130,5 +137,29 @@ export async function advanceDealAction(
     return { ok: true };
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message.replace(/^advanceDeal:\s*/, "") : "Could not update the deal." };
+  }
+}
+
+/** Day 1 §5.4 — a call, a meeting, a message, kept as its own record. */
+export async function recordInteractionAction(
+  leadId: string,
+  kind: string,
+  summary: string,
+  participants: string,
+): Promise<ActionResult> {
+  try {
+    const admin = await requirePlatformAdmin();
+    if (!summary.trim()) return { ok: false, error: "Say what happened." };
+    await recordInteraction({
+      leadId,
+      kind: kind as InteractionKind,
+      summary,
+      participants,
+      actor: admin.id,
+    });
+    revalidatePath("/admin/growth");
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message.replace(/^recordInteraction:\s*/, "") : "Could not record that." };
   }
 }
