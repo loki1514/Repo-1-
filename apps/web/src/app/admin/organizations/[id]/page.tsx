@@ -88,6 +88,30 @@ export default async function OrganizationDetailPage({
       .in("work_item_id", work.map((w) => w.id).length ? work.map((w) => w.id) : ["00000000-0000-0000-0000-000000000000"]),
   ]);
 
+  // Day 1 §6.2 — the person behind this organization, who may hold others.
+  const { data: customerRows } = await supabaseAdmin
+    .from("customer_organizations")
+    .select("relation, customers(id, full_name, phone)")
+    .eq("organization_id", id);
+  const customers = (customerRows ?? []).map((r) => {
+    const c = (r as { customers?: { id: string; full_name: string; phone: string | null } | { id: string; full_name: string; phone: string | null }[] | null }).customers;
+    const one = Array.isArray(c) ? c[0] : c;
+    return { id: one?.id ?? "", name: one?.full_name ?? "—", phone: one?.phone ?? null, relation: r.relation as string };
+  }).filter((c) => c.id);
+
+  const { data: otherOrgRows } = customers.length
+    ? await supabaseAdmin
+        .from("customer_organizations")
+        .select("customer_id, organizations(id, name)")
+        .in("customer_id", customers.map((c) => c.id))
+        .neq("organization_id", id)
+    : { data: [] };
+  const alsoOwns = (otherOrgRows ?? []).map((r) => {
+    const o = (r as { organizations?: { id: string; name: string } | { id: string; name: string }[] | null }).organizations;
+    const one = Array.isArray(o) ? o[0] : o;
+    return one?.name ?? "";
+  }).filter(Boolean);
+
   const { data: peopleRows } = await supabaseAdmin
     .from("org_users")
     .select("id, email, full_name, status, role_id, roles(name)")
@@ -232,6 +256,32 @@ export default async function OrganizationDetailPage({
         roles={roles}
         invites={invites}
       />
+
+      {customers.length > 0 && (
+        <div className="glass rounded-[var(--r-xl)] p-5">
+          <div className="relative z-10">
+            <h2 className="t-h3">Customer</h2>
+            <p className="mt-1 text-[13px] text-muted">
+              The person, kept separate from the business — one human can hold several
+              organizations.
+            </p>
+            <ul className="mt-3 space-y-1.5">
+              {customers.map((c) => (
+                <li key={c.id} className="text-[13.5px]">
+                  <strong>{c.name}</strong>
+                  <span className="ml-2 text-[10.5px] uppercase tracking-wide text-muted">{c.relation}</span>
+                  {c.phone && <span className="text-muted"> · {c.phone}</span>}
+                </li>
+              ))}
+            </ul>
+            {alsoOwns.length > 0 && (
+              <p className="mt-2 text-[12.5px] text-muted">
+                Also linked to {alsoOwns.join(", ")}.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Day 2 §5/§6 — the people in this organization and their roles */}
       <OrgPeopleCard organizationId={organization.id} people={people} roles={roles} />

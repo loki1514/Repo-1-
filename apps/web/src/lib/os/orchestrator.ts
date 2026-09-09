@@ -220,6 +220,44 @@ export async function convertLeadToOrganization(input: {
 
   const orgId = organization.id;
 
+  // --- 1b. the customer, as a person distinct from the organization --------
+  // Day 1 pack §6.2: "Customer identity and organization identity must be
+  // separate concepts: a person can interact with multiple organizations."
+  // Sunita is matched on phone so a second business she owns reuses her
+  // record rather than duplicating her.
+  if (lead.contact_name?.trim()) {
+    const phone = lead.contact_phone?.trim() || null;
+    const existing = phone
+      ? await supabaseAdmin.from("customers").select("id").eq("phone", phone).maybeSingle()
+      : { data: null };
+
+    let customerId = existing.data?.id as string | undefined;
+    if (!customerId) {
+      const { data: created, error: custErr } = await supabaseAdmin
+        .from("customers")
+        .insert({
+          full_name: lead.contact_name.trim(),
+          phone,
+          created_by: input.actor,
+        })
+        .select("id")
+        .single();
+      if (custErr) throw new Error(`convertLead (customer): ${custErr.message}`);
+      customerId = created.id as string;
+      cascade.push(`Customer "${lead.contact_name.trim()}" created as a person, separate from the business`);
+    } else {
+      cascade.push(`Matched to the existing customer "${lead.contact_name.trim()}" — one person, several businesses`);
+    }
+
+    await supabaseAdmin
+      .from("customer_organizations")
+      .upsert(
+        { customer_id: customerId, organization_id: orgId, relation: "owner" },
+        { onConflict: "customer_id,organization_id,relation" },
+      );
+    await supabaseAdmin.from("leads").update({ customer_id: customerId }).eq("id", input.leadId);
+  }
+
   // --- 2. onboarding lifecycle starts --------------------------------------
   await setOnboardingStage(orgId, "new_handoff");
   cascade.push("Onboarding opened at stage “New handoff”");
